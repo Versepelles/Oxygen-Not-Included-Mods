@@ -358,6 +358,8 @@ MigrationBackup/
 
 # Versepelles Ignored Files
 *.sln
+kanimal-cli.exe
+kanimal-cli.pdb
+**/Art Source/*/output/
 Test Mod/
 TinyWorld/
-SharlesPlants/

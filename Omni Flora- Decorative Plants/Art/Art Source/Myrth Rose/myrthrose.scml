@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spriter_data scml_version="1.0" generator="BrashMonkey Spriter" generator_version="r11">
+    <folder id="0">
+        <file id="0" name="ui_0.png" width="135" height="135" pivot_x="0.5" pivot_y="0.5"/>
+        <file id="1" name="myrthrose_0.png" width="135" height="135" pivot_x="0.474074" pivot_y="0.177778"/>
+        <file id="2" name="myrthrose_1.png" width="135" height="135" pivot_x="0.518519" pivot_y="0.155556"/>
+        <file id="3" name="myrthrose_2.png" width="135" height="135" pivot_x="0.488889" pivot_y="0.081481"/>
+        <file id="4" name="myrthrose_place_0.png" width="135" height="135" pivot_x="0.488889" pivot_y="0.081481"/>
+        <file id="5" name="myrthrose_wilt_0.png" width="135" height="135" pivot_x="0.511111" pivot_y="0.22963"/>
+    </folder>
+    <entity id="0" name="myrthrose">
+        <animation id="0" name="juvenile" length="990" interval="33">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="myrthrose_0">
+                <key id="0" spin="0">
+                    <object folder="0" file="1" y="-5"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="1" name="mature" length="990" interval="33">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="myrthrose_1">
+                <key id="0" spin="0">
+                    <object folder="0" file="2" y="-5"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="2" name="flourishing" length="990" interval="33">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="myrthrose_2">
+                <key id="0" spin="0">
+                    <object folder="0" file="3" y="-5"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="3" name="place" length="990" interval="33">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="myrthrose_place_0">
+                <key id="0" spin="0">
+                    <object folder="0" file="4" y="-5"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="4" name="wilt" length="990" interval="33">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="myrthrose_wilt_0">
+                <key id="0" spin="0">
+                    <object folder="0" file="5" y="-5"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="5" name="ui" length="990" interval="33">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="ui_0">
+                <key id="0" spin="0">
+                    <object folder="0" file="0" angle="0"/>
+                </key>
+            </timeline>
+        </animation>
+    </entity>
+</spriter_data>

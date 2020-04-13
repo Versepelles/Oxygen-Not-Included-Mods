@@ -2,6 +2,7 @@
 using PeterHan.PLib;
 using PeterHan.PLib.Options;
 using System.Collections.Generic;
+using UnityEngine;
 using static MiniBase.Profiles.MiniBaseBiomeProfiles;
 using static MiniBase.Profiles.MiniBaseCoreBiomeProfiles;
 
@@ -10,7 +11,13 @@ namespace MiniBase
     [JsonObject(MemberSerialization.OptIn)]
     public class MiniBaseOptions : POptions.SingletonOptions<MiniBaseOptions>
     {
-        [Option("These options are only applied when the map is generated,\nwith the exception of Steam Turbines.\n ")]
+        [JsonProperty]
+        public int CustomWidth { get; set; }
+
+        [JsonProperty]
+        public int CustomHeight { get; set; }
+
+        [Option("These options are only applied when the map is generated,\nexcept for Steam Turbines and Care Packages.\n ")]
         public LocText Header { get; }
 
         [Option("Western Feature", "The geyser, vent, or volcano on the left side of the map.")]
@@ -24,6 +31,10 @@ namespace MiniBase
         [Option("Core Feature", "The geyser, vent, or volcano at the bottom of the map.\nInaccessible until the abyssalite boundary is breached.")]
         [JsonProperty]
         public FeatureType FeatureSouth { get; set; }
+
+        [Option("Size", "The dimensions of the buildable area.")]
+        [JsonProperty]
+        public BaseSize Size { get; set; }
 
         [Option("Biome", "The main biome of the map.\nDetermines available resources, flora, and fauna.")]
         [JsonProperty]
@@ -45,21 +56,45 @@ namespace MiniBase
         [JsonProperty]
         public bool TurbinesDisabled { get; set; }
 
+        [Option("Care Package Frequency", "Frequency of care package drops in cycles.\nMay not update until the next delivery.")]
+        [Limit(1, 10)]
+        [JsonProperty]
+        public int CarePackageFrequency { get; set; }
+
+        // TODO: Reset to defaults button
+        // TODO: Add raw terrain option to sides instead of space
+
         public MiniBaseOptions()
         {
+            CustomWidth = 70;
+            CustomHeight = 40;
             FeatureWest = FeatureType.RandomWater;
             FeatureEast = FeatureType.RandomUseful;
             FeatureSouth = FeatureType.None;
+            Size = BaseSize.Normal;
             Biome = BiomeType.Sandstone;
             CoreBiome = CoreType.Magma;
             ResourceMod = ResourceModifier.Normal;
             SpaceAccess = true;
             TurbinesDisabled = true;
+            CarePackageFrequency = 3;
         }
 
         public static void Reload()
         {
             Instance = POptions.ReadSettings<MiniBaseOptions>();
+        }
+
+        public Vector2I GetBaseSize()
+        {
+            if (Size == BaseSize.Custom)
+            {
+                CustomWidth = Mathf.Clamp(CustomWidth, 20, 100);
+                CustomHeight = Mathf.Clamp(CustomHeight, 20, 100);
+                return new Vector2I(CustomWidth, CustomHeight);
+            }
+            var dictionary = MiniBaseConfig.BaseSizeDictionary;
+            return dictionary.ContainsKey(Size) ? dictionary[Size] : dictionary[BaseSize.Normal];
         }
 
         public MiniBaseBiomeProfile GetBiome()
@@ -136,6 +171,30 @@ namespace MiniBase
             [Option("Random (Volcano)", "Random lava or metal volcano")]
             RandomVolcano,
             None,
+        }
+
+        public enum BaseSize
+        {
+            [Option("Tiny", "30x20")]
+            Tiny,
+            [Option("Small", "50x40")]
+            Small,
+            [Option("Normal", "70x40")]
+            Normal,
+            [Option("Large", "90x50")]
+            Large,
+            [Option("Skinny Short", "26x70")]
+            SkinnyMid,
+            [Option("Skinny Tall", "26x100")]
+            SkinnyTall,
+            [Option("Inverted", "40x70")]
+            NormalMid,
+            [Option("Tall", "40x100")]
+            NormalTall,
+            [Option("Large Square", "90x90")]
+            LargeSquare,
+            [Option("Custom", "Edit the config file manually.\nChange the CustomWidth and CustomHeight properties.\nDimensions must be in [20, 100].")]
+            Custom,
         }
 
         public enum BiomeType

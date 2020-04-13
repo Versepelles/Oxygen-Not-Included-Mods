@@ -4,8 +4,6 @@ namespace MiniBase.Profiles
 {
     class MiniBaseBiomeProfiles
     {
-        // When creating a biome, see the notes on TinyWorldGen.GenerateNoiseMap about minimum range
-
         public static MiniBaseBiomeProfile SandstoneProfile = new MiniBaseBiomeProfile(
             "subworlds/sandstone/SandstoneStart",
             SimHashes.SandStone,
@@ -35,7 +33,6 @@ namespace MiniBase.Profiles
             {
                 { "Drecko", 0.04f },
                 { "Squirrel", 0.04f },
-                { "Puft", 0.04f },
                 { "BasicSingleHarvestPlant", 0.06f },
                 { "PrickleFlower", 0.04f },
                 { "Oxyfern", 0.04f },
@@ -63,6 +60,7 @@ namespace MiniBase.Profiles
             new Dictionary<string, float>()
             {
                 { "LightBug", 0.02f },
+                { "Puft", 0.01f },
             });
 
         public static MiniBaseBiomeProfile ForestProfile = new MiniBaseBiomeProfile(
@@ -128,17 +126,17 @@ namespace MiniBase.Profiles
             303f,
             new BandInfo[]
             {
-                new BandInfo(0.20f, SimHashes.Water, 310f),
-                new BandInfo(0.25f, SimHashes.Oxygen, density: 2f),
-                new BandInfo(0.27f, SimHashes.SlimeMold),
-                new BandInfo(0.30f, SimHashes.Clay),
-                new BandInfo(0.32f, SimHashes.Sand, density: 2f),
-                new BandInfo(0.36f, SimHashes.FoolsGold),
+                new BandInfo(0.23f, SimHashes.Water, 310f),
+                new BandInfo(0.27f, SimHashes.Oxygen, density: 2f),
+                new BandInfo(0.30f, SimHashes.SlimeMold),
+                new BandInfo(0.32f, SimHashes.Clay),
+                new BandInfo(0.34f, SimHashes.Sand, density: 2f),
+                new BandInfo(0.37f, SimHashes.FoolsGold),
                 new BandInfo(0.40f, SimHashes.IgneousRock, density: 2f),
                 new BandInfo(0.43f, SimHashes.Carbon),
                 new BandInfo(0.48f, SimHashes.Dirt),
                 new BandInfo(0.52f, SimHashes.Algae),
-                new BandInfo(0.53f, SimHashes.ChlorineGas),
+                new BandInfo(0.53f, SimHashes.ChlorineGas, density: 2f),
                 new BandInfo(0.60f, SimHashes.ContaminatedOxygen, density: 2f),
                 new BandInfo(0.63f, SimHashes.IgneousRock, density: 2f),
                 new BandInfo(0.64f, SimHashes.BleachStone, density: 4f),
@@ -209,9 +207,9 @@ namespace MiniBase.Profiles
                 new BandInfo(0.60f, SimHashes.Granite),
                 new BandInfo(0.62f, SimHashes.Fossil),
                 new BandInfo(0.64f, SimHashes.Lime),
-                new BandInfo(0.70f, SimHashes.Dirt),
-                new BandInfo(0.75f, SimHashes.Wolframite),
-                new BandInfo(0.80f, SimHashes.Oxygen, density: 2f),
+                new BandInfo(0.69f, SimHashes.Dirt),
+                new BandInfo(0.74f, SimHashes.Wolframite),
+                new BandInfo(0.77f, SimHashes.Oxygen, density: 2f),
                 new BandInfo(1.00f, SimHashes.Water, 278f),
             },
             spawnablesOnFloor:
@@ -311,7 +309,7 @@ namespace MiniBase.Profiles
                 new BandInfo(0.70f, SimHashes.IgneousRock),
                 new BandInfo(0.75f, SimHashes.OxyRock, density: 2f),
                 new BandInfo(0.90f, SimHashes.Oxygen, density: 2f),
-                new BandInfo(0.94f, SimHashes.CarbonDioxide),
+                new BandInfo(0.94f, SimHashes.CarbonDioxide, density: 2f),
                 new BandInfo(0.96f, SimHashes.IgneousRock),
                 new BandInfo(1.00f, SimHashes.OxyRock, density: 2f),
             },
@@ -373,7 +371,7 @@ namespace MiniBase.Profiles
                 new BandInfo(0.84f, SimHashes.OxyRock),
                 new BandInfo(0.86f, SimHashes.Sand),
                 new BandInfo(0.88f, SimHashes.Clay),
-                new BandInfo(0.90f, SimHashes.ContaminatedOxygen),
+                new BandInfo(0.90f, SimHashes.ContaminatedOxygen, density: 2f),
                 new BandInfo(0.93f, SimHashes.DirtyIce),
                 new BandInfo(0.95f, SimHashes.OxyRock),
                 new BandInfo(1.00f, SimHashes.DirtyWater),

@@ -59,6 +59,7 @@ namespace MiniBase
             updateProgressFn(UI.WORLDGEN.PROCESSING.key, 100f, WorldGenProgressStages.Stages.Processing);
 
             // Printing pod
+            // TODO: add items to the chest
             data.gameSpawnData.baseStartPos = Vec(Left() + (Width() / 2) - 1, Bottom() + (Height() / 2) + 2);
             var templateSpawnTargets = new List<KeyValuePair<Vector2I, TemplateContainer>>();
             TemplateContainer startingBaseTemplate = TemplateCache.GetStartingBaseTemplate(worldGen.Settings.world.startingBaseTemplate);
@@ -339,9 +340,9 @@ namespace MiniBase
                 borderMat = WorldGen.katairiteElement;
                 for(int y = Top(); y < Top(true); y++)
                 {
-                    for (int x = Left() + CORNER_SIZE; x < Left() + CORNER_SIZE + SPACE_ACCESS_SIZE; x++)
+                    for (int x = Left() + CORNER_SIZE; x < Math.Min(Left() + CORNER_SIZE + SPACE_ACCESS_SIZE, Right() - CORNER_SIZE); x++)
                         AddBorderCell(x, y, borderMat);
-                    for (int x = Right() - CORNER_SIZE - SPACE_ACCESS_SIZE; x < Right() - CORNER_SIZE; x++)
+                    for (int x = Math.Max(Right() - CORNER_SIZE - SPACE_ACCESS_SIZE, Left() + CORNER_SIZE); x < Right() - CORNER_SIZE; x++)
                         AddBorderCell(x, y, borderMat);
                 }
             }
@@ -398,6 +399,7 @@ namespace MiniBase
             var spawnPoints = new SpawnPoints()
             {
                 onFloor = new HashSet<Vector2I>(),
+                onCeil = new HashSet<Vector2I>(),
                 inGround = new HashSet<Vector2I>(),
                 inAir = new HashSet<Vector2I>(),
                 inLiquid = new HashSet<Vector2I>(),
@@ -427,6 +429,7 @@ namespace MiniBase
         public struct SpawnPoints
         {
             public ISet<Vector2I> onFloor;
+            public ISet<Vector2I> onCeil;
             public ISet<Vector2I> inGround;
             public ISet<Vector2I> inAir;
             public ISet<Vector2I> inLiquid;
@@ -436,7 +439,7 @@ namespace MiniBase
         {
             var spawnStruct = GetSpawnPoints(cells, biomeCells);
             PlaceSpawnables(spawnList, biome.spawnablesOnFloor, spawnStruct.onFloor, Prefab.Type.Pickupable);
-            PlaceSpawnables(spawnList, biome.spawnablesOnCeil, spawnStruct.onFloor, Prefab.Type.Pickupable);
+            PlaceSpawnables(spawnList, biome.spawnablesOnCeil, spawnStruct.onCeil, Prefab.Type.Pickupable);
             PlaceSpawnables(spawnList, biome.spawnablesInGround, spawnStruct.inGround, Prefab.Type.Pickupable);
             PlaceSpawnables(spawnList, biome.spawnablesInLiquid, spawnStruct.inLiquid, Prefab.Type.Pickupable);
             PlaceSpawnables(spawnList, biome.spawnablesInAir, spawnStruct.inAir, Prefab.Type.Pickupable);
@@ -463,10 +466,11 @@ namespace MiniBase
 
         // The following utility methods all refer to the main liveable area
         // E.g., Width() returns the width of the liveable area, not the whole map
-        public static int Left(bool withBorders = false) { return SIDE_MARGIN + (withBorders ? 0 : BORDER_SIZE); }
-        public static int Right(bool withBorders = false) { return Left(withBorders) + LIVABLE_WIDTH + (withBorders ? BORDER_SIZE * 2 : 0); }
+        public static int SideMargin() { return (WORLD_WIDTH - MiniBaseOptions.Instance.GetBaseSize().x - 2 * BORDER_SIZE) / 2; }
+        public static int Left(bool withBorders = false) { return SideMargin() + (withBorders ? 0 : BORDER_SIZE); }
+        public static int Right(bool withBorders = false) { return Left(withBorders) + MiniBaseOptions.Instance.GetBaseSize().x + (withBorders ? BORDER_SIZE * 2 : 0); }
         public static int Top(bool withBorders = false) { return WORLD_HEIGHT - TOP_MARGIN - (withBorders ? 0 : BORDER_SIZE) + 1; }
-        public static int Bottom(bool withBorders = false) { return Top(withBorders) - LIVABLE_HEIGHT - (withBorders ? BORDER_SIZE * 2 : 0); }
+        public static int Bottom(bool withBorders = false) { return Top(withBorders) - MiniBaseOptions.Instance.GetBaseSize().y - (withBorders ? BORDER_SIZE * 2 : 0); }
         public static int Width(bool withBorders = false) { return Right(withBorders) - Left(withBorders); }
         public static int Height(bool withBorders = false) { return Top(withBorders) - Bottom(withBorders); }
         public static Vector2I TopLeft(bool withBorders = false) { return Vec(Left(withBorders), Top(withBorders)); }
@@ -492,44 +496,45 @@ namespace MiniBase
         // NOTE: currently, the range is actually [yCorrection, 1.0] roughly centered around 0.5
         public static float[,] GenerateNoiseMap(System.Random r, int width, int height)
         {
-            Octave oct1 = new Octave(1f, 6f);
+            Octave oct1 = new Octave(1f, 8f);
             Octave oct2 = new Octave(oct1.amp / 2, oct1.freq * 2);
             Octave oct3 = new Octave(oct2.amp / 2, oct2.freq * 2);
             float maxAmp = oct1.amp + oct2.amp + oct3.amp;
+            float absolutePeriod = 100f;
             float xStretch = 2.5f;
             float zStretch = 1.6f;
             Vector2f offset = new Vector2f((float) r.NextDouble(), (float) r.NextDouble());
             float[,] noiseMap = new float[width, height];
 
             float total = 0f;
-            for (int x = 0; x < width; x++)
+            for (int i = 0; i < width; i++)
             {
-                for (int y = 0; y < height; y++)
+                for (int j = 0; j < height; j++)
                 {
-                    Vector2f pos = new Vector2f(x * 1f / width + offset.x, y * 1f / height + offset.y);     // Find current x,y position for the noise function
-                    double e =                                                                              // Generate a value in [0, maxAmp] with average maxAmp / 2
+                    Vector2f pos = new Vector2f(i / absolutePeriod + offset.x, j / absolutePeriod + offset.y);      // Find current x,y position for the noise function
+                    double e =                                                                                      // Generate a value in [0, maxAmp] with average maxAmp / 2
                         oct1.amp * Mathf.PerlinNoise(oct1.freq * pos.x / xStretch, oct1.freq * pos.y) +
                         oct2.amp * Mathf.PerlinNoise(oct2.freq * pos.x / xStretch, oct2.freq * pos.y) +
                         oct3.amp * Mathf.PerlinNoise(oct3.freq * pos.x / xStretch, oct3.freq * pos.y);
                     
-                    e = e / maxAmp;                                                                         // Normalize to [0, 1]
+                    e = e / maxAmp;                                                                                 // Normalize to [0, 1]
                     float f = Mathf.Clamp((float) e, 0f, 1f);
                     total += f;
 
-                    noiseMap[x, y] = f;
+                    noiseMap[i, j] = f;
                 }
             }
 
-            // Center the distribution
+            // Center the distribution at 0.5 and stretch it to fill out [0, 1]
             float average = total / noiseMap.Length;
-            for (int x = 0; x < width; x++)
-                for (int y = 0; y < height; y++)
+            for (int i = 0; i < width; i++)
+                for (int j = 0; j < height; j++)
                 {
-                    float f = noiseMap[x, y];
+                    float f = noiseMap[i, j];
                     f -= average;
                     f *= zStretch;
                     f += 0.5f;
-                    noiseMap[x, y] = Mathf.Clamp(f, 0f, 1f);
+                    noiseMap[i, j] = Mathf.Clamp(f, 0f, 1f);
                 }
 
             return noiseMap;

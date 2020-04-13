@@ -9,9 +9,6 @@ namespace MiniBase
         public static int WORLD_HEIGHT = 128;
         public static int BORDER_SIZE = 3;
         public static int TOP_MARGIN = 3;
-        public static int LIVABLE_WIDTH = 70;
-        public static int LIVABLE_HEIGHT = 40;
-        public static int SIDE_MARGIN = (WORLD_WIDTH - LIVABLE_WIDTH - 2 * BORDER_SIZE) / 2;
         public static int CORNER_SIZE = 7;
         public static int DIAGONAL_BORDER_SIZE = 4;
 
@@ -22,7 +19,22 @@ namespace MiniBase
 
         // DEBUG
         public static bool DEBUG_MODE = true;
+        public static bool FAST_IMMIGRATION = false;
+        public static bool TEST_NOISEMAPS = false;
         public static bool SKIP_LIVEABLE_AREA = false;
+
+        public static Dictionary<BaseSize, Vector2I> BaseSizeDictionary = new Dictionary<BaseSize, Vector2I>()
+        {
+            { BaseSize.Tiny, new Vector2I(30, 20) },
+            { BaseSize.Small, new Vector2I(50, 30) },
+            { BaseSize.Normal, new Vector2I(70, 40) },
+            { BaseSize.Large, new Vector2I(90, 50) },
+            { BaseSize.SkinnyMid, new Vector2I(26, 70) },
+            { BaseSize.SkinnyTall, new Vector2I(26, 100) },
+            { BaseSize.NormalMid, new Vector2I(40, 70) },
+            { BaseSize.NormalTall, new Vector2I(40, 100) },
+            { BaseSize.LargeSquare, new Vector2I(90, 90) },
+        };
 
         public static Dictionary<FeatureType, string> GeyserDictionary = new Dictionary<FeatureType, string>()
         {

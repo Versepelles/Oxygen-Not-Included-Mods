@@ -46,7 +46,7 @@ namespace MiniBase
                 POptions.RegisterOptions(typeof(MiniBaseOptions));
 
                 // Noisemap test
-                if (DEBUG_MODE)
+                if (TEST_NOISEMAPS)
                     TestNoiseMaps();
             }
         }
@@ -100,15 +100,16 @@ namespace MiniBase
 
         #region CarePackages
 
-        // Fast immigration
-        // TODO: remove
+        // Immigration speed
         [HarmonyPatch(typeof(Immigration), "OnPrefabInit")]
         public static class Immigration_OnPrefabInit_Patch
         {
             private static void Prefix(Immigration __instance)
             {
                 Log("Immigration_OnPrefabInit_Patch Prefix");
-                if(DEBUG_MODE)
+                float frequency = MiniBaseOptions.Instance.CarePackageFrequency * 600f;
+                __instance.spawnInterval = new float[] { frequency, frequency };
+                if (FAST_IMMIGRATION)
                     __instance.spawnInterval = new float[] { 10f, 5f };
             }
         }

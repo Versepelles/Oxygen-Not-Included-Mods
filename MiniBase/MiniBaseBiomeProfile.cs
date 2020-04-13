@@ -30,7 +30,7 @@ namespace MiniBase
             this.defaultTemperature = defaultTemperature;
             this.bandProfile = bandProfile;
             this.spawnablesOnFloor = spawnablesOnFloor ?? new Dictionary<string, float>();
-            this.spawnablesOnFloor = spawnablesOnCeil ?? new Dictionary<string, float>();
+            this.spawnablesOnCeil = spawnablesOnCeil ?? new Dictionary<string, float>();
             this.spawnablesInGround = spawnablesInGround ?? new Dictionary<string, float>();
             this.spawnablesInLiquid = spawnablesInLiquid ?? new Dictionary<string, float>();
             this.spawnablesInAir = spawnablesInAir ?? new Dictionary<string, float>();

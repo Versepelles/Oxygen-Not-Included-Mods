@@ -63,13 +63,24 @@ namespace MiniBase
             }
         }
 
-        // Reload mod options
+        // Reload mod options at asteroid select screen, before world gen happens
         [HarmonyPatch(typeof(ColonyDestinationSelectScreen), "LaunchClicked")]
         public static class ColonyDestinationSelectScreen_LaunchClicked_Patch
         {
             private static void Prefix()
             {
                 Log("ColonyDestinationSelectScreen_LaunchClicked_Patch Prefix");
+                MiniBaseOptions.Reload();
+            }
+        }
+
+        // Reload mod options when game is reloaded from save
+        [HarmonyPatch(typeof(Game), "OnSpawn")]
+        public static class Game_OnLoadLevel_Patch
+        {
+            private static void Prefix()
+            {
+                Log("Game_OnSpawn_Patch Prefix");
                 MiniBaseOptions.Reload();
             }
         }
@@ -111,6 +122,21 @@ namespace MiniBase
                 __instance.spawnInterval = new float[] { frequency, frequency };
                 if (FAST_IMMIGRATION)
                     __instance.spawnInterval = new float[] { 10f, 5f };
+            }
+        }
+        
+        // Immigration speed
+        [HarmonyPatch(typeof(Immigration), "OnSpawn")]
+        public static class Immigration_OnSpawn_Patch
+        {
+            private static void Postfix(Immigration __instance)
+            {
+                if (__instance.GetType() == typeof(Immigration))
+                {
+                    Log("Immigration_OnSpawn_Patch Postfix");
+                    float frequency = MiniBaseOptions.Instance.CarePackageFrequency * 600f;
+                    __instance.timeBeforeSpawn = Math.Min(frequency, __instance.timeBeforeSpawn);
+                }
             }
         }
 
@@ -187,7 +213,7 @@ namespace MiniBase
         }
 
         // This code was edited and used with permission from asquared31415 and is subject to their licenses and rights
-        // The complete unedited code and prject can be found at https://github.com/asquared31415/ONI-Mods/tree/dev/src/ConfigurablePrintingPod
+        // The complete unedited code and project can be found at https://github.com/asquared31415/ONI-Mods/tree/dev/src/ConfigurablePrintingPod
         [HarmonyPatch(typeof(CharacterSelectionController), "InitializeContainers")]
         public class CharacterSelectionControler_InitializeContainers_Patches
         {

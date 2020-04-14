@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ProcGenGame;
+using System.Collections.Generic;
 using static MiniBase.MiniBaseOptions;
 
 namespace MiniBase
@@ -13,28 +14,18 @@ namespace MiniBase
         public static int DIAGONAL_BORDER_SIZE = 4;
 
         public static int SPACE_ACCESS_SIZE = 8;
-        public static int CORE_MIN = 3;
-        public static int CORE_MAX = 6;
+        public static int CORE_MIN = 0;
+        public static int CORE_DEVIATION = 3;
         public static int CORE_BORDER = 3;
+
+        public static string FOOD_POISONING = WorldGen.diseaseIds[0];
+        public static string SLIMELUNG = WorldGen.diseaseIds[1];
 
         // DEBUG
         public static bool DEBUG_MODE = true;
         public static bool FAST_IMMIGRATION = false;
         public static bool TEST_NOISEMAPS = false;
         public static bool SKIP_LIVEABLE_AREA = false;
-
-        public static Dictionary<BaseSize, Vector2I> BaseSizeDictionary = new Dictionary<BaseSize, Vector2I>()
-        {
-            { BaseSize.Tiny, new Vector2I(30, 20) },
-            { BaseSize.Small, new Vector2I(50, 30) },
-            { BaseSize.Normal, new Vector2I(70, 40) },
-            { BaseSize.Large, new Vector2I(90, 50) },
-            { BaseSize.SkinnyMid, new Vector2I(26, 70) },
-            { BaseSize.SkinnyTall, new Vector2I(26, 100) },
-            { BaseSize.NormalMid, new Vector2I(40, 70) },
-            { BaseSize.NormalTall, new Vector2I(40, 100) },
-            { BaseSize.LargeSquare, new Vector2I(90, 90) },
-        };
 
         public static Dictionary<FeatureType, string> GeyserDictionary = new Dictionary<FeatureType, string>()
         {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using static MiniBase.MiniBaseConfig;
 
 namespace MiniBase.Profiles
 {
@@ -36,9 +37,9 @@ namespace MiniBase.Profiles
                 { "BasicSingleHarvestPlant", 0.06f },
                 { "PrickleFlower", 0.04f },
                 { "Oxyfern", 0.04f },
-                { "PrickleGrass", 0.05f },
-                { "LeafyPlant", 0.05f },
-                { "BasicForagePlantPlanted", 0.04f },
+                { "PrickleGrass", 0.06f },
+                { "LeafyPlant", 0.06f },
+                { "BasicForagePlantPlanted", 0.05f },
             },
             spawnablesInGround:
             new Dictionary<string, float>()
@@ -59,8 +60,13 @@ namespace MiniBase.Profiles
             spawnablesInAir:
             new Dictionary<string, float>()
             {
-                { "LightBug", 0.02f },
-                { "Puft", 0.01f },
+                { "LightBug", 0.025f },
+                { "Puft", 0.015f },
+            },
+            spawnablesInLiquid:
+            new Dictionary<string, float>()
+            {
+                { "Pacu", 0.01f },
             });
 
         public static MiniBaseBiomeProfile ForestProfile = new MiniBaseBiomeProfile(
@@ -91,17 +97,15 @@ namespace MiniBase.Profiles
             spawnablesOnFloor:
             new Dictionary<string, float>()
             {
-                { "LightBug", 0.04f },
-                { "LightBugOrange", 0.03f },
                 { "Drecko", 0.04f },
                 { "Squirrel", 0.07f },
                 { "BasicSingleHarvestPlant", 0.06f },
-                { "ForestTree", 0.08f },
+                { "ForestTree", 0.10f },
                 { "PrickleFlower", 0.05f },
                 { "Oxyfern", 0.07f },
-                { "PrickleGrass", 0.03f },
-                { "LeafyPlant", 0.05f },
-                { "ForestForagePlantPlanted", 0.06f },
+                { "PrickleGrass", 0.04f },
+                { "LeafyPlant", 0.06f },
+                { "ForestForagePlantPlanted", 0.07f },
             },
             spawnablesInGround:
             new Dictionary<string, float>()
@@ -118,6 +122,17 @@ namespace MiniBase.Profiles
                 { "BasicFabricMaterialPlantSeed", 0.003f },
                 { "ColdBreatherSeed", 0.001f },
                 { "EvilFlowerSeed", 0.001f },
+            },
+            spawnablesInAir:
+            new Dictionary<string, float>()
+            {
+                { "LightBug", 0.02f },
+                { "LightBugOrange", 0.02f },
+            },
+            spawnablesInLiquid:
+            new Dictionary<string, float>()
+            {
+                { "Pacu", 0.01f },
             });
 
         public static MiniBaseBiomeProfile SwampProfile = new MiniBaseBiomeProfile(
@@ -128,7 +143,7 @@ namespace MiniBase.Profiles
             {
                 new BandInfo(0.23f, SimHashes.Water, 310f),
                 new BandInfo(0.27f, SimHashes.Oxygen, density: 2f),
-                new BandInfo(0.30f, SimHashes.SlimeMold),
+                new BandInfo(0.30f, SimHashes.SlimeMold, disease: SLIMELUNG),
                 new BandInfo(0.32f, SimHashes.Clay),
                 new BandInfo(0.34f, SimHashes.Sand, density: 2f),
                 new BandInfo(0.37f, SimHashes.FoolsGold),
@@ -141,7 +156,7 @@ namespace MiniBase.Profiles
                 new BandInfo(0.63f, SimHashes.IgneousRock, density: 2f),
                 new BandInfo(0.64f, SimHashes.BleachStone, density: 4f),
                 new BandInfo(0.66f, SimHashes.SedimentaryRock),
-                new BandInfo(0.73f, SimHashes.SlimeMold),
+                new BandInfo(0.73f, SimHashes.SlimeMold, disease: SLIMELUNG),
                 new BandInfo(0.77f, SimHashes.GoldAmalgam),
                 new BandInfo(0.85f, SimHashes.ContaminatedOxygen, density: 2f),
                 new BandInfo(1.00f, SimHashes.DirtyWater, 310f),
@@ -149,17 +164,13 @@ namespace MiniBase.Profiles
             spawnablesOnFloor:
             new Dictionary<string, float>()
             {
-                { "LightBug", 0.02f },
-                { "LightBugOrange", 0.03f },
                 { "Drecko", 0.03f },
                 { "Glom", 0.04f },
-                { "Puft", 0.02f },
-                { "PuftAlpha", 0.02f },
                 { "BasicSingleHarvestPlant", 0.06f },
                 { "SwampLily", 0.04f },
                 { "BasicFabricPlant", 0.04f },
-                { "BulbPlant", 0.04f },
-                { "LeafyPlant", 0.04f },
+                { "BulbPlant", 0.05f },
+                { "LeafyPlant", 0.05f },
                 { "MushroomPlant", 0.06f },
                 { "BasicForagePlantPlanted", 0.02f },
                 { "ForestForagePlantPlanted", 0.04f },
@@ -181,10 +192,18 @@ namespace MiniBase.Profiles
                 { "OxyfernSeed", 0.002f },
                 { "EvilFlowerSeed", 0.001f },
             },
+            spawnablesInAir:
+            new Dictionary<string, float>()
+            {
+                { "LightBug", 0.01f },
+                { "LightBugOrange", 0.01f },
+                { "Puft", 0.02f },
+                { "PuftAlpha", 0.02f },
+            },
             spawnablesInLiquid:
             new Dictionary<string, float>()
             {
-                { "Pacu", 0.02f },
+                { "Pacu", 0.04f },
             });
 
         public static MiniBaseBiomeProfile FrozenProfile = new MiniBaseBiomeProfile(
@@ -199,7 +218,7 @@ namespace MiniBase.Profiles
                 new BandInfo(0.34f, SimHashes.DirtyIce, 235f),
                 new BandInfo(0.37f, SimHashes.BrineIce, 235f),
                 new BandInfo(0.40f, SimHashes.Ice, 245f),
-                new BandInfo(0.44f, SimHashes.Snow, 245f),
+                new BandInfo(0.44f, SimHashes.Snow, 245f, density: 50f),
                 new BandInfo(0.47f, SimHashes.OxyRock, 265f, density: 2f),
                 new BandInfo(0.50f, SimHashes.IgneousRock),
                 new BandInfo(0.54f, SimHashes.IgneousRock, 285f),
@@ -212,10 +231,16 @@ namespace MiniBase.Profiles
                 new BandInfo(0.77f, SimHashes.Oxygen, density: 2f),
                 new BandInfo(1.00f, SimHashes.Water, 278f),
             },
+            startingItems:
+            new List<KeyValuePair<string, float>>()
+            {
+                new KeyValuePair<string, float>("Warm_Vest", 1f),
+                new KeyValuePair<string, float>("Warm_Vest", 1f),
+                new KeyValuePair<string, float>("Warm_Vest", 1f),
+            },
             spawnablesOnFloor:
             new Dictionary<string, float>()
             {
-                { "LightBugBlue", 0.07f },
                 { "BasicForagePlantPlanted", 0.12f },
                 { "BasicSingleHarvestPlant", 0.06f },
                 { "ColdWheat", 0.12f },
@@ -226,9 +251,18 @@ namespace MiniBase.Profiles
             {
                 { "BasicForagePlant", 0.010f },
                 { "BasicSingleHarvestPlantSeed", 0.010f },
-                { "Warm_Vest", 0.005f },
                 { "PrickleFlowerSeed", 0.003f },
                 { "ColdBreatherSeed", 0.001f },
+            },
+            spawnablesInAir:
+            new Dictionary<string, float>()
+            {
+                { "LightBugBlue", 0.04f },
+            },
+            spawnablesInLiquid:
+            new Dictionary<string, float>()
+            {
+                { "PacuCleanerEgg", 0.03f },
             });
 
         public static MiniBaseBiomeProfile DesertProfile = new MiniBaseBiomeProfile(
@@ -262,17 +296,21 @@ namespace MiniBase.Profiles
                 new BandInfo(0.96f, SimHashes.SandStone),
                 new BandInfo(1.00f, SimHashes.OxyRock, density: 2f),
             },
+            startingItems:
+            new List<KeyValuePair<string, float>>()
+            {
+                new KeyValuePair<string, float>("Cool_Vest", 1f),
+                new KeyValuePair<string, float>("Cool_Vest", 1f),
+                new KeyValuePair<string, float>("Cool_Vest", 1f),
+            },
             spawnablesOnFloor:
             new Dictionary<string, float>()
             {
-                { "LightBug", 0.04f },
-                { "LightBugOrange", 0.03f },
-                { "LightBugPink", 0.02f },
-                { "Oilfloater", 0.04f },
+                { "Oilfloater", 0.05f },
                 { "OilfloaterDecor", 0.02f },
                 { "BasicSingleHarvestPlant", 0.06f },
-                { "CactusPlant", 0.08f },
-                { "PrickleGrass", 0.04f },
+                { "CactusPlant", 0.10f },
+                { "PrickleGrass", 0.06f },
                 { "EvilFlower", 0.02f },
                 { "BasicForagePlantPlanted", 0.08f },
             },
@@ -286,6 +324,18 @@ namespace MiniBase.Profiles
                 { "BasicSingleHarvestPlantSeed", 0.010f },
                 { "CactusPlantSeed", 0.005f },
                 { "EvilFlowerSeed", 0.003f },
+            },
+            spawnablesInAir:
+            new Dictionary<string, float>()
+            {
+                { "LightBug", 0.01f },
+                { "LightBugOrange", 0.02f },
+                { "LightBugPink", 0.01f },
+            },
+            spawnablesInLiquid:
+            new Dictionary<string, float>()
+            {
+                { "PacuTropical", 0.02f },
             });
 
         public static MiniBaseBiomeProfile BarrenProfile = new MiniBaseBiomeProfile(
@@ -320,7 +370,9 @@ namespace MiniBase.Profiles
             spawnablesInGround:
             new Dictionary<string, float>()
             {
+                { "Hatch", 0.002f },
                 { "HatchHard", 0.008f },
+                { "BasicSingleHarvestPlantSeed", 0.003f },
                 { "EvilFlowerSeed", 0.003f },
             });
 
@@ -375,6 +427,13 @@ namespace MiniBase.Profiles
                 new BandInfo(0.93f, SimHashes.DirtyIce),
                 new BandInfo(0.95f, SimHashes.OxyRock),
                 new BandInfo(1.00f, SimHashes.DirtyWater),
+            },
+            startingItems:
+            new List<KeyValuePair<string, float>>()
+            {
+                new KeyValuePair<string, float>("Funky_vest", 1f),
+                new KeyValuePair<string, float>("Funky_vest", 1f),
+                new KeyValuePair<string, float>("Funky_vest", 1f),
             },
             spawnablesOnFloor:
             new Dictionary<string, float>()
@@ -437,9 +496,6 @@ namespace MiniBase.Profiles
                 { "BasicFabricMaterialPlantSeed", 0.005f },
                 { "ColdBreatherSeed", 0.001f },
                 { "EvilFlowerSeed", 0.001f },
-                { "Cool_Vest", 0.002f },
-                { "Warm_Vest", 0.002f },
-                { "Funky_Vest", 0.005f },
             });
     }
 }

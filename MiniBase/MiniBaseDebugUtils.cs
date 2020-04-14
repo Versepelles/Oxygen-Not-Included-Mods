@@ -9,7 +9,7 @@ namespace MiniBase
         public static void Log(String msg)
         {
             if (DEBUG_MODE)
-                Console.WriteLine("<TinyWorld> " + msg);
+                Console.WriteLine("<MiniBase> " + msg);
         }
 
         public static void TestNoiseMaps()

@@ -8,6 +8,7 @@ namespace MiniBase
         public SimHashes defaultMaterial;
         public float defaultTemperature;
         public BandInfo[] bandProfile;
+        public List<KeyValuePair<string, float>> startingItems;
         public Dictionary<string, float> spawnablesOnFloor;
         public Dictionary<string, float> spawnablesOnCeil;
         public Dictionary<string, float> spawnablesInGround;
@@ -19,6 +20,7 @@ namespace MiniBase
             SimHashes defaultMaterial,
             float defaultTemperature,
             BandInfo[] bandProfile,
+            List<KeyValuePair<string, float>> startingItems = null,
             Dictionary<string, float> spawnablesOnFloor = null,
             Dictionary<string, float> spawnablesOnCeil = null,
             Dictionary<string, float> spawnablesInGround = null,
@@ -29,6 +31,7 @@ namespace MiniBase
             this.defaultMaterial = defaultMaterial;
             this.defaultTemperature = defaultTemperature;
             this.bandProfile = bandProfile;
+            this.startingItems = startingItems ?? new List<KeyValuePair<string, float>>();
             this.spawnablesOnFloor = spawnablesOnFloor ?? new Dictionary<string, float>();
             this.spawnablesOnCeil = spawnablesOnCeil ?? new Dictionary<string, float>();
             this.spawnablesInGround = spawnablesInGround ?? new Dictionary<string, float>();
@@ -60,13 +63,15 @@ namespace MiniBase
         public SimHashes elementId;
         public float temperature;
         public float density;
+        public string disease;
 
-        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f)
+        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f, string disease = null)
         {
             this.cumulativeWeight = cumulativeWeight;
             this.elementId = elementId;
             this.temperature = temperature;
             this.density = density;
+            this.disease = disease;
         }
 
         public Element GetElement() { return ElementLoader.FindElementByHash(elementId); }

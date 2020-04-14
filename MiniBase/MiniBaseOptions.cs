@@ -11,12 +11,6 @@ namespace MiniBase
     [JsonObject(MemberSerialization.OptIn)]
     public class MiniBaseOptions : POptions.SingletonOptions<MiniBaseOptions>
     {
-        [JsonProperty]
-        public int CustomWidth { get; set; }
-
-        [JsonProperty]
-        public int CustomHeight { get; set; }
-
         [Option("These options are only applied when the map is generated,\nexcept for Steam Turbines and Care Packages.\n ")]
         public LocText Header { get; }
 
@@ -61,10 +55,32 @@ namespace MiniBase
         [JsonProperty]
         public int CarePackageFrequency { get; set; }
 
+        private const string CustomSizeCategory = "These options only apply if the 'Size' option is set to 'Custom'.";
+
+        [Option("Custom Width", "Only works if the 'Size' option is set to 'Custom'.", CustomSizeCategory)]
+        [Limit(20, 100)]
+        [JsonProperty]
+        public int CustomWidth { get; set; }
+
+        [Option("Custom Height", "Only works if the 'Size' option is set to 'Custom'.", CustomSizeCategory)]
+        [Limit(20, 100)]
+        [JsonProperty]
+        public int CustomHeight { get; set; }
+
         // TODO: Reset to defaults button
+        /*
+        [Option("Reset to Defaults")]
+        public readonly System.Action ResetButton = () => { Instance.Reset(); };
+        */
+
         // TODO: Add raw terrain option to sides instead of space
 
         public MiniBaseOptions()
+        {
+            ResetToDefaults();
+        }
+
+        private void ResetToDefaults()
         {
             CustomWidth = 70;
             CustomHeight = 40;
@@ -88,13 +104,8 @@ namespace MiniBase
         public Vector2I GetBaseSize()
         {
             if (Size == BaseSize.Custom)
-            {
-                CustomWidth = Mathf.Clamp(CustomWidth, 20, 100);
-                CustomHeight = Mathf.Clamp(CustomHeight, 20, 100);
                 return new Vector2I(CustomWidth, CustomHeight);
-            }
-            var dictionary = MiniBaseConfig.BaseSizeDictionary;
-            return dictionary.ContainsKey(Size) ? dictionary[Size] : dictionary[BaseSize.Normal];
+            return BaseSizeDictionary.ContainsKey(Size) ? BaseSizeDictionary[Size] : BaseSizeDictionary[BaseSize.Normal];
         }
 
         public MiniBaseBiomeProfile GetBiome()
@@ -183,19 +194,35 @@ namespace MiniBase
             Normal,
             [Option("Large", "90x50")]
             Large,
-            [Option("Skinny Short", "26x70")]
-            SkinnyMid,
-            [Option("Skinny Tall", "26x100")]
-            SkinnyTall,
-            [Option("Inverted", "40x70")]
-            NormalMid,
-            [Option("Tall", "40x100")]
-            NormalTall,
+            [Option("Square", "50x50")]
+            Square,
+            [Option("Medium Square", "70x70")]
+            MediumSquare,
             [Option("Large Square", "90x90")]
             LargeSquare,
-            [Option("Custom", "Edit the config file manually.\nChange the CustomWidth and CustomHeight properties.\nDimensions must be in [20, 100].")]
+            [Option("Inverted", "40x70")]
+            Inverted,
+            [Option("Tall", "40x100")]
+            Tall,
+            [Option("Skinny", "26x100")]
+            Skinny,
+            [Option("Custom", "Custom size can be set below (scroll down).")]
             Custom,
         }
+
+        private static Dictionary<BaseSize, Vector2I> BaseSizeDictionary = new Dictionary<BaseSize, Vector2I>()
+        {
+            { BaseSize.Tiny, new Vector2I(30, 20) },
+            { BaseSize.Small, new Vector2I(50, 30) },
+            { BaseSize.Normal, new Vector2I(70, 40) },
+            { BaseSize.Large, new Vector2I(90, 50) },
+            { BaseSize.Square, new Vector2I(50, 50) },
+            { BaseSize.MediumSquare, new Vector2I(70, 70) },
+            { BaseSize.LargeSquare, new Vector2I(90, 90) },
+            { BaseSize.Inverted, new Vector2I(40, 70) },
+            { BaseSize.Tall, new Vector2I(40, 100) },
+            { BaseSize.Skinny, new Vector2I(26, 100) },
+        };
 
         public enum BiomeType
         {

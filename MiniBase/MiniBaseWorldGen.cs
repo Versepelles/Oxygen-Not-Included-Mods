@@ -23,6 +23,8 @@ namespace MiniBase
         public static Sim.Cell[] CreateWorld(WorldGen worldGen, ref Sim.DiseaseCell[] dc)
         {
             MiniBaseOptions options = MiniBaseOptions.Instance;
+            MiniBaseBiomeProfile biomeProfile = options.GetBiome();
+            MiniBaseBiomeProfile coreProfile = options.GetCoreBiome();
 
             // Convenience variables, including private fields/properties
             var instance = Traverse.Create(worldGen);
@@ -59,14 +61,20 @@ namespace MiniBase
             updateProgressFn(UI.WORLDGEN.PROCESSING.key, 100f, WorldGenProgressStages.Stages.Processing);
 
             // Printing pod
-            // TODO: add items to the chest
             data.gameSpawnData.baseStartPos = Vec(Left() + (Width() / 2) - 1, Bottom() + (Height() / 2) + 2);
             var templateSpawnTargets = new List<KeyValuePair<Vector2I, TemplateContainer>>();
             TemplateContainer startingBaseTemplate = TemplateCache.GetStartingBaseTemplate(worldGen.Settings.world.startingBaseTemplate);
             startingBaseTemplate.pickupables.Clear(); // Remove stray hatch
+            var rationBox = startingBaseTemplate.buildings.Find(b => b.id == "RationBox");
+            foreach (var entry in biomeProfile.startingItems)
+                rationBox.storage.Add(new StorageItem() // Add starting items to the ration box. Non-food items will appear on the ground
+                {
+                    id = entry.Key,
+                    units = entry.Value,
+                });
             foreach (Cell cell in startingBaseTemplate.cells)
                 if (cell.element == SimHashes.SandStone || cell.element == SimHashes.Algae)
-                    cell.element = options.GetBiome().defaultMaterial;
+                    cell.element = biomeProfile.defaultMaterial;
             startingBaseTemplate.cells.RemoveAll((c) => (c.location_x == -8) || (c.location_x == 9)); // Trim the starting base area
             templateSpawnTargets.Add(new KeyValuePair<Vector2I, TemplateContainer>(data.gameSpawnData.baseStartPos, startingBaseTemplate));
 
@@ -75,11 +83,11 @@ namespace MiniBase
             int GeyserMaxX = Right() - CORNER_SIZE - 4;
             int GeyserMinY = Bottom() + CORNER_SIZE + 2;
             int GeyserMaxY = Top() - CORNER_SIZE - 4;
-            Element coverElement = options.GetBiome().DefaultElement();
+            Element coverElement = biomeProfile.DefaultElement();
             PlaceGeyser(data, cells, options.FeatureWest, Vec(Left() + 2, random.Next(GeyserMinY, GeyserMaxY + 1)), coverElement);
             PlaceGeyser(data, cells, options.FeatureEast, Vec(Right() - 4, random.Next(GeyserMinY, GeyserMaxY + 1)), coverElement);
             if (options.HasCore())
-                coverElement = options.GetCoreBiome().DefaultElement();
+                coverElement = coreProfile.DefaultElement();
             PlaceGeyser(data, cells, options.FeatureSouth, Vec(random.Next(GeyserMinX, GeyserMaxX + 1), Bottom()), coverElement);
 
             // Change geysers to be made of abyssalite so they don't melt in magma
@@ -102,10 +110,10 @@ namespace MiniBase
 
             // Add plants, critters, and items
             updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 0f, WorldGenProgressStages.Stages.PlacingCreatures);
-            PlaceSpawnables(cells, data.gameSpawnData.pickupables, options.GetBiome(), biomeCells);
+            PlaceSpawnables(cells, data.gameSpawnData.pickupables, biomeProfile, biomeCells);
             updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 50f, WorldGenProgressStages.Stages.PlacingCreatures);
             if (options.HasCore())
-                PlaceSpawnables(cells, data.gameSpawnData.pickupables, options.GetCoreBiome(), coreCells);
+                PlaceSpawnables(cells, data.gameSpawnData.pickupables, coreProfile, coreCells);
             updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 100f, WorldGenProgressStages.Stages.PlacingCreatures);
 
             // Place templates, pretty much just the printing pod
@@ -220,7 +228,7 @@ namespace MiniBase
                 return biomeCells;
 
             // Using a smooth noisemap, map the noise values to elements via the element band profile
-            void PopulateTerrain(MiniBaseBiomeProfile biome, ISet<Vector2I> positions)
+            void SetTerrain(MiniBaseBiomeProfile biome, ISet<Vector2I> positions)
             {
                 foreach(var pos in positions)
                 {
@@ -228,7 +236,14 @@ namespace MiniBase
                     BandInfo bandInfo = biome.GetBand(e);
                     Element element = bandInfo.GetElement();
                     Sim.PhysicsData elementData = biome.GetPhysicsData(bandInfo);
-                    cells[Grid.PosToCell(pos)].SetValues(element, elementData, ElementLoader.elements);
+                    int cell = Grid.PosToCell(pos);
+                    cells[cell].SetValues(element, elementData, ElementLoader.elements);
+                    if (bandInfo.disease != null)
+                        dc[cell] = new Sim.DiseaseCell()
+                        {
+                            diseaseIdx = (byte) WorldGen.diseaseIds.FindIndex(d => d == bandInfo.disease),
+                            elementCount = random.Next(10000, 1000000),
+                        };
                 }
             }
 
@@ -237,12 +252,13 @@ namespace MiniBase
             for (int i = 0; i < Width(); i++)
                 for (int j = 0; j < Height(); j++)
                     biomeCells.Add(BottomLeft() + Vec(i, j));
-            PopulateTerrain(MiniBaseOptions.Instance.GetBiome(), biomeCells);
+            SetTerrain(MiniBaseOptions.Instance.GetBiome(), biomeCells);
 
             // Core area
             if (options.HasCore())
             {
-                int[] heights = GetHorizontalWalk(Width(), CORE_MIN, CORE_MAX);
+                int coreHeight = CORE_MIN + Height() / 10;
+                int[] heights = GetHorizontalWalk(Width(), coreHeight, coreHeight + CORE_DEVIATION);
                 ISet<Vector2I> abyssaliteCells = new HashSet<Vector2I>();
                 for (int i = 0; i < Width(); i++)
                 {
@@ -263,7 +279,7 @@ namespace MiniBase
                     for (int j = 0; j < heights[i]; j++)
                         coreCells.Add(BottomLeft() + Vec(i, j));
                 }
-                PopulateTerrain(MiniBaseOptions.Instance.GetCoreBiome(), coreCells);
+                SetTerrain(MiniBaseOptions.Instance.GetCoreBiome(), coreCells);
                 foreach (Vector2I abyssaliteCell in abyssaliteCells)
                     cells[Grid.PosToCell(abyssaliteCell)].SetValues(WorldGen.katairiteElement, ElementLoader.elements);
                 biomeCells.ExceptWith(coreCells);
@@ -496,7 +512,7 @@ namespace MiniBase
         // NOTE: currently, the range is actually [yCorrection, 1.0] roughly centered around 0.5
         public static float[,] GenerateNoiseMap(System.Random r, int width, int height)
         {
-            Octave oct1 = new Octave(1f, 8f);
+            Octave oct1 = new Octave(1f, 10f);
             Octave oct2 = new Octave(oct1.amp / 2, oct1.freq * 2);
             Octave oct3 = new Octave(oct2.amp / 2, oct2.freq * 2);
             float maxAmp = oct1.amp + oct2.amp + oct3.amp;

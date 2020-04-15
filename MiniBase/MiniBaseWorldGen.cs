@@ -38,7 +38,7 @@ namespace MiniBase
 
             // Initialize noise maps
             updateProgressFn(UI.WORLDGEN.GENERATENOISE.key, 0f, WorldGenProgressStages.Stages.NoiseMapBuilder);
-            float[,] noiseMap = GenerateNoiseMap(random, Width(), Height());
+            float[,] noiseMap = GenerateNoiseMap(random, WORLD_WIDTH, WORLD_HEIGHT);
             updateProgressFn(UI.WORLDGEN.GENERATENOISE.key, 100f, WorldGenProgressStages.Stages.NoiseMapBuilder);
 
             // Set biomes
@@ -133,6 +133,10 @@ namespace MiniBase
         private static void SetBiomes(List<TerrainCell> overworldCells)
         {
             overworldCells.Clear();
+            var options = MiniBaseOptions.Instance;
+            string SpaceBiome = "subworlds/space/Space";
+            string backgroundBiome = options.GetBiome().backgroundSubworld;
+            string sideBiome = options.SideBiome == MiniBaseOptions.SideType.Terrain ? backgroundBiome : SpaceBiome;
 
             TagSet tags;
             List<Vector2> vertices;
@@ -177,32 +181,45 @@ namespace MiniBase
                 BottomRightSW
             };
             bounds = new Polygon(vertices);
-            CreateOverworldCell(MiniBaseOptions.Instance.GetBiome().backgroundSubworld, bounds, tags);
+            CreateOverworldCell(backgroundBiome, bounds, tags);
 
             // Top cell
             tags = new TagSet();
             bounds = new Polygon(new Rect(0f, Top(), WORLD_WIDTH, WORLD_HEIGHT - Top()));
-            CreateOverworldCell("subworlds/space/Space", bounds, tags);
+            CreateOverworldCell(SpaceBiome, bounds, tags);
 
-            // Bottom + sides cell
+            // Bottom cell
+            tags = new TagSet();
+            bounds = new Polygon(new Rect(0f, 0, WORLD_WIDTH, Bottom()));
+            CreateOverworldCell(SpaceBiome, bounds, tags);
+
+            // Left side cell
             tags = new TagSet();
             vertices = new List<Vector2>()
             {
-                Vec(0, 0),
+                Vec(0, Bottom()),
                 Vec(0, Top()),
                 TopLeftNE,
                 TopLeftSW,
                 BottomLeftNW,
                 BottomLeftSE,
+            };
+            bounds = new Polygon(vertices);
+            CreateOverworldCell(sideBiome, bounds, tags);
+
+            // Right side cell
+            tags = new TagSet();
+            vertices = new List<Vector2>()
+            {
                 BottomRightSW,
                 BottomRightNE,
                 TopRightSE,
                 TopRightNW,
                 Vec(WORLD_WIDTH, Top()),
-                Vec(WORLD_WIDTH, 0),
+                Vec(WORLD_WIDTH, Bottom()),
             };
             bounds = new Polygon(vertices);
-            CreateOverworldCell("subworlds/space/Space", bounds, tags);
+            CreateOverworldCell(sideBiome, bounds, tags);
         }
 
         // From WorldGen.RenderToMap
@@ -220,7 +237,9 @@ namespace MiniBase
         // Rewrite of WorldGen.ProcessByTerrainCell
         private static ISet<Vector2I> DrawCustomTerrain(Data data, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, float[,] noiseMap, out ISet<Vector2I> coreCells)
         {
+            var options = MiniBaseOptions.Instance;
             var biomeCells = new HashSet<Vector2I>();
+            var sideCells = new HashSet<Vector2I>();
             coreCells = new HashSet<Vector2I>();
             for (int index = 0; index < data.terrainCells.Count; ++index)
                 data.terrainCells[index].InitializeCells();
@@ -232,7 +251,8 @@ namespace MiniBase
             {
                 foreach(var pos in positions)
                 {
-                    float e = noiseMap[pos.x - Left(), pos.y - Bottom()];
+                    Log($"Trying to set terrain at {pos.x} {pos.y}");
+                    float e = noiseMap[pos.x, pos.y];
                     BandInfo bandInfo = biome.GetBand(e);
                     Element element = bandInfo.GetElement();
                     Sim.PhysicsData elementData = biome.GetPhysicsData(bandInfo);
@@ -248,37 +268,49 @@ namespace MiniBase
             }
 
             // Main biome
-            var options = MiniBaseOptions.Instance;
-            for (int i = 0; i < Width(); i++)
-                for (int j = 0; j < Height(); j++)
-                    biomeCells.Add(BottomLeft() + Vec(i, j));
-            SetTerrain(MiniBaseOptions.Instance.GetBiome(), biomeCells);
+            int relativeLeft = options.SideBiome == MiniBaseOptions.SideType.Terrain ? 0 : Left();
+            int relativeRight = options.SideBiome == MiniBaseOptions.SideType.Terrain ? WORLD_WIDTH : Right();
+            for (int x = relativeLeft; x < relativeRight; x++)
+                for (int y = Bottom(); y < Top(); y++)
+                {
+                    var pos = Vec(x, y);
+                    if (InLiveableArea(pos))
+                        biomeCells.Add(pos);
+                    else
+                        sideCells.Add(pos);
+
+                }
+            SetTerrain(options.GetBiome(), biomeCells);
+            SetTerrain(options.GetBiome(), sideCells);
 
             // Core area
             if (options.HasCore())
             {
                 int coreHeight = CORE_MIN + Height() / 10;
-                int[] heights = GetHorizontalWalk(Width(), coreHeight, coreHeight + CORE_DEVIATION);
+                int[] heights = GetHorizontalWalk(WORLD_WIDTH, coreHeight, coreHeight + CORE_DEVIATION);
                 ISet<Vector2I> abyssaliteCells = new HashSet<Vector2I>();
-                for (int i = 0; i < Width(); i++)
+                for (int x = relativeLeft; x < relativeRight; x++)
                 {
-                    // Create abyssalite border
+                    // Create abyssalite border of size CORE_BORDER
                     for (int j = 0; j < CORE_BORDER; j++)
-                        abyssaliteCells.Add(BottomLeft() + Vec(i, heights[i] + j));
-                    // Ensure border thickness
-                    if(i > 0 && i < Width() - 1)
-                        if((heights[i - 1] - heights[i] > 1) || (heights[i + 1] - heights[i] > 1))
+                        abyssaliteCells.Add(Vec(x, Bottom() + heights[x] + j));
+                    // Ensure border thickness at places where it shifts by more than one
+                    // TODO
+                    /*
+                    if(x < relativeRight - 1)
+                        if((heights[x - 1] - heights[x] > 1) || (heights[x + 1] - heights[x] > 1))
                         {
-                            Vector2I top = BottomLeft() + Vec(i, heights[i] + CORE_BORDER - 1);
+                            Vector2I top = Vec(x, Bottom() + heights[x] + CORE_BORDER - 1);
                             abyssaliteCells.Add(top + Vec(-1, 0));
                             abyssaliteCells.Add(top + Vec(1, 0));
                             abyssaliteCells.Add(top + Vec(0, 1));
-                        }
+                        }*/
                     
                     // Mark core
-                    for (int j = 0; j < heights[i]; j++)
-                        coreCells.Add(BottomLeft() + Vec(i, j));
+                    for (int y = Bottom(); y < Bottom() + heights[x]; y++)
+                        coreCells.Add(Vec(x, y));
                 }
+                coreCells.ExceptWith(abyssaliteCells);
                 SetTerrain(MiniBaseOptions.Instance.GetCoreBiome(), coreCells);
                 foreach (Vector2I abyssaliteCell in abyssaliteCells)
                     cells[Grid.PosToCell(abyssaliteCell)].SetValues(WorldGen.katairiteElement, ElementLoader.elements);

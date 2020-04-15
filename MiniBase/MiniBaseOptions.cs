@@ -34,10 +34,14 @@ namespace MiniBase
         [JsonProperty]
         public BiomeType Biome { get; set; }
 
+        //[Option("Side Biomes", "The areas outside the liveable area.\nThis is a purely aesthetic option.")]
+        //[JsonProperty]
+        public SideType SideBiome { get; set; }
+
         [Option("Planet Core", "The auxiliary biome at the bottom of the map.\nProtected by a layer of abyssalite.")]
         [JsonProperty]
         public CoreType CoreBiome { get; set; }
-
+        
         [Option("Resource Density", "Modifies the density of available resources.")]
         [JsonProperty]
         public ResourceModifier ResourceMod { get; set; }
@@ -73,8 +77,6 @@ namespace MiniBase
         public readonly System.Action ResetButton = () => { Instance.Reset(); };
         */
 
-        // TODO: Add raw terrain option to sides instead of space
-
         public MiniBaseOptions()
         {
             ResetToDefaults();
@@ -90,6 +92,7 @@ namespace MiniBase
             Size = BaseSize.Normal;
             Biome = BiomeType.Sandstone;
             CoreBiome = CoreType.Magma;
+            SideBiome = SideType.Space;
             ResourceMod = ResourceModifier.Normal;
             SpaceAccess = true;
             TurbinesDisabled = true;
@@ -277,6 +280,12 @@ namespace MiniBase
             Normal,
             [Option("Rich", "50% more resources")]
             Rich,
+        }
+
+        public enum SideType
+        {
+            Space,
+            Terrain,
         }
     }
 }

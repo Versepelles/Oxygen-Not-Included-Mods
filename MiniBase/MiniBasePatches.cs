@@ -98,14 +98,22 @@ namespace MiniBase
         }
 
         // Disable Steam Turbine
-        // TODO: remove steam turbine icon from build menu
-        [HarmonyPatch(typeof(PlanScreen), "BuildableState")]
-        public static class PlanScreen_BuildableState_Patch
+        [HarmonyPatch(typeof(PlanScreen), "PopulateOrderInfo")]
+        public static class PlanScreen_PopulateOrderInfo_Patch
         {
-            private static void Postfix(BuildingDef def, ref PlanScreen.RequirementsState __result)
+            private static void Prefix(HashedString category, ref object data)
             {
-                if (MiniBaseOptions.Instance.TurbinesDisabled && def.name == "SteamTurbine2")
-                    __result = PlanScreen.RequirementsState.Tech;
+                if((category == new HashedString("Power")) && (data.GetType() != typeof(PlanScreen.PlanInfo)))
+                {
+                    Log("PlanScreen_PopulateOrderInfo_Patch Prefix");
+                    var list = new List<string>((List<string>) data); // Shallow copy
+                    string SteamTurbine = "SteamTurbine2";
+                    if (MiniBaseOptions.Instance.TurbinesDisabled && list.Contains(SteamTurbine))
+                    {
+                        list.Remove(SteamTurbine);
+                        data = list;
+                    }
+                }
             }
         }
 

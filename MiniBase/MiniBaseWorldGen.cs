@@ -251,7 +251,6 @@ namespace MiniBase
             {
                 foreach(var pos in positions)
                 {
-                    Log($"Trying to set terrain at {pos.x} {pos.y}");
                     float e = noiseMap[pos.x, pos.y];
                     BandInfo bandInfo = biome.GetBand(e);
                     Element element = bandInfo.GetElement();

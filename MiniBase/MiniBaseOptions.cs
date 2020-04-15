@@ -51,7 +51,7 @@ namespace MiniBase
         [JsonProperty]
         public bool SpaceAccess { get; set; }
 
-        [Option("Disable Steam Turbines", "Prevents steam turbines from being built.\nAlternative cooling methods will be required.", AnytimeCategory)]
+        [Option("Disable Steam Turbines", "Prevents steam turbines from being built.\nAlternative cooling methods will be required.\nIt is advised to have a Cool Slush or Polluted Water geyser.", AnytimeCategory)]
         [JsonProperty]
         public bool TurbinesDisabled { get; set; }
 
@@ -83,7 +83,7 @@ namespace MiniBase
             SideBiome = SideType.Space;
             ResourceMod = ResourceModifier.Normal;
             SpaceAccess = true;
-            TurbinesDisabled = true;
+            TurbinesDisabled = false;
             CarePackageFrequency = 2;
         }
 

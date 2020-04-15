@@ -5,7 +5,7 @@ namespace MiniBase.Profiles
 {
     class MiniBaseBiomeProfiles
     {
-        public static MiniBaseBiomeProfile SandstoneProfile = new MiniBaseBiomeProfile(
+        public static MiniBaseBiomeProfile TemperateProfile = new MiniBaseBiomeProfile(
             "subworlds/sandstone/SandstoneStart",
             SimHashes.SandStone,
             -1f,
@@ -271,8 +271,8 @@ namespace MiniBase.Profiles
             313f,
             new BandInfo[]
             {
-                new BandInfo(0.12f, SimHashes.CrudeOil, 373f, density: 2f),
-                new BandInfo(0.15f, SimHashes.Water, 373f),
+                new BandInfo(0.14f, SimHashes.CrudeOil, 373f, density: 4.3f),
+                new BandInfo(0.16f, SimHashes.Water, 373f),
                 new BandInfo(0.18f, SimHashes.Water, 333f),
                 new BandInfo(0.20f, SimHashes.Water, 313f),
                 new BandInfo(0.22f, SimHashes.Water, 303f),

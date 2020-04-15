@@ -11,27 +11,23 @@ namespace MiniBase
     [JsonObject(MemberSerialization.OptIn)]
     public class MiniBaseOptions : POptions.SingletonOptions<MiniBaseOptions>
     {
-        private const string WorldGenCategory = "These options are only applied when the map is generated.";
-        private const string AnytimeCategory = "These options can be changed at any time.";
-        private const string CustomSizeCategory = "These options only apply if 'Map Size' is set to 'Custom'.";
+        private const string WorldGenCategory = "These options are only applied when the map is generated";
+        private const string SizeCategory = "These options change the size of the liveable area\nTo define a custom size, set Map Size to 'Custom'";
+        private const string AnytimeCategory = "These options may be changed at any time";
 
-        [Option("Western Feature", "The geyser, vent, or volcano on the left side of the map.", WorldGenCategory)]
+        [Option("Western Feature", "The geyser, vent, or volcano on the left side of the map", WorldGenCategory)]
         [JsonProperty]
         public FeatureType FeatureWest { get; set; }
 
-        [Option("Eastern Feature", "The geyser, vent, or volcano on the right side of the map.", WorldGenCategory)]
+        [Option("Eastern Feature", "The geyser, vent, or volcano on the right side of the map", WorldGenCategory)]
         [JsonProperty]
         public FeatureType FeatureEast { get; set; }
 
-        [Option("Core Feature", "The geyser, vent, or volcano at the bottom of the map.\nInaccessible until the abyssalite boundary is breached.", WorldGenCategory)]
+        [Option("Southern Feature", "The geyser, vent, or volcano at the bottom of the map\nInaccessible until the abyssalite boundary is breached", WorldGenCategory)]
         [JsonProperty]
         public FeatureType FeatureSouth { get; set; }
 
-        [Option("Map Size", "The size of the liveable area.", WorldGenCategory)]
-        [JsonProperty]
-        public BaseSize Size { get; set; }
-
-        [Option("Main Biome", "The main biome of the map.\nDetermines available resources, flora, and fauna.", WorldGenCategory)]
+        [Option("Main Biome", "The main biome of the map\nDetermines available resources, flora, and fauna", WorldGenCategory)]
         [JsonProperty]
         public BiomeType Biome { get; set; }
 
@@ -39,51 +35,55 @@ namespace MiniBase
         //[JsonProperty]
         public SideType SideBiome { get; set; }
 
-        [Option("Core Biome", "The auxiliary biome at the bottom of the liveable area.\nProtected by a layer of abyssalite.", WorldGenCategory)]
+        [Option("Southern Biome", "The small biome at the bottom of the map\nProtected by a layer of abyssalite", WorldGenCategory)]
         [JsonProperty]
         public CoreType CoreBiome { get; set; }
         
-        [Option("Resource Density", "Modifies the density of available resources.", WorldGenCategory)]
+        [Option("Resource Density", "Modifies the density of available resources", WorldGenCategory)]
         [JsonProperty]
         public ResourceModifier ResourceMod { get; set; }
 
-        [Option("Space Access", "Allows renewable resources to be collected from meteorites.\nDoes not significantly increase the liveable area.", WorldGenCategory)]
+        [Option("Space Access", "Allows renewable resources to be collected from meteorites\nDoes not significantly increase the liveable area", WorldGenCategory)]
         [JsonProperty]
         public bool SpaceAccess { get; set; }
 
-        [Option("Disable Steam Turbines", "Prevents steam turbines from being built.\nAlternative cooling methods will be required.\nIt is advised to have a Cool Slush or Polluted Water geyser.", AnytimeCategory)]
+        [Option("Map Size", "The size of the liveable area\nSelect 'Custom' to define a custom size", SizeCategory)]
         [JsonProperty]
-        public bool TurbinesDisabled { get; set; }
+        public BaseSize Size { get; set; }
 
-        [Option("Care Package Drops (Cycles)", "Period of care package drops, in cycles.", AnytimeCategory)]
-        [Limit(1, 10)]
-        [JsonProperty]
-        public int CarePackageFrequency { get; set; }
-
-        [Option("Custom Width", "Only applies if the 'Map Size' option is set to 'Custom'.", CustomSizeCategory)]
+        [Option("Custom Width", "The width of the liveable area\nMap Size must be set to 'Custom' for this to apply", SizeCategory)]
         [Limit(20, 100)]
         [JsonProperty]
         public int CustomWidth { get; set; }
 
-        [Option("Custom Height", "Only applies if the 'Map Size' option is set to 'Custom'.", CustomSizeCategory)]
+        [Option("Custom Height", "The height of the liveable area\nMap Size must be set to 'Custom' for this to apply", SizeCategory)]
         [Limit(20, 100)]
         [JsonProperty]
         public int CustomHeight { get; set; }
 
+        [Option("Disable Steam Turbines", "Prevents steam turbines from being built\nAlternative cooling methods will be required\n(e.g. Cool Slush or Polluted Water geyser)", AnytimeCategory)]
+        [JsonProperty]
+        public bool TurbinesDisabled { get; set; }
+
+        [Option("Care Package Timer (Cycles)", "Period of care package drops, in cycles\nLower values give more frequent drops", AnytimeCategory)]
+        [Limit(1, 10)]
+        [JsonProperty]
+        public int CarePackageFrequency { get; set; }
+
         public MiniBaseOptions()
         {
-            CustomWidth = 70;
-            CustomHeight = 40;
-            FeatureWest = FeatureType.RandomWater;
+            FeatureWest = FeatureType.CoolSlush;
             FeatureEast = FeatureType.RandomUseful;
             FeatureSouth = FeatureType.None;
-            Size = BaseSize.Normal;
-            Biome = BiomeType.Sandstone;
+            Biome = BiomeType.Temperate;
             CoreBiome = CoreType.Magma;
             SideBiome = SideType.Space;
             ResourceMod = ResourceModifier.Normal;
             SpaceAccess = true;
-            TurbinesDisabled = false;
+            Size = BaseSize.Normal;
+            CustomWidth = 70;
+            CustomHeight = 40;
+            TurbinesDisabled = true;
             CarePackageFrequency = 2;
         }
 
@@ -101,7 +101,7 @@ namespace MiniBase
 
         public MiniBaseBiomeProfile GetBiome()
         {
-            return BiomeTypeMap.ContainsKey(Biome) ? BiomeTypeMap[Biome] : SandstoneProfile;
+            return BiomeTypeMap.ContainsKey(Biome) ? BiomeTypeMap[Biome] : TemperateProfile;
         }
 
         public bool HasCore() { return CoreBiome != CoreType.None; }
@@ -168,7 +168,7 @@ namespace MiniBase
             RandomAny,
             [Option("Random (Water)", "Warm water, salt water, polluted water, or cool slush geyser")]
             RandomWater,
-            [Option("Random (Useful)", "Random water, power, volcano, or metal feature\nExcludes features like chlorine, CO2, etc")]
+            [Option("Random (Useful)", "Random water or power feature\nExcludes volcanoes and features like chlorine, CO2, etc")]
             RandomUseful,
             [Option("Random (Volcano)", "Random lava or metal volcano")]
             RandomVolcano,
@@ -197,7 +197,7 @@ namespace MiniBase
             Tall,
             [Option("Skinny", "26x100")]
             Skinny,
-            [Option("Custom", "Custom size can be set below (scroll down).")]
+            [Option("Custom", "Select to define custom size")]
             Custom,
         }
 
@@ -217,19 +217,25 @@ namespace MiniBase
 
         public enum BiomeType
         {
-            Sandstone,
+            [Option("Temperate", "Inviting and inhabitable")]
+            Temperate,
+            [Option("Forest", "Temperate and earthy")]
             Forest,
+            [Option("Swamp", "Beware the slime!")]
             Swamp,
+            [Option("Frozen", "Cold, but at least you get some jackets")]
             Frozen,
+            [Option("Desert", "Hot and sandy")]
             Desert,
+            [Option("Barren", "Hard rocks, hard hatches, hard to survive")]
             Barren,
-            [Option("Str?nge", "A random hodgepodge of all kinds of things with no discernable order")]
+            [Option("Str?nge", "#%*@&#^$%(_#$&%^#@*&")]
             Strange,
         }
 
         private static Dictionary<BiomeType, MiniBaseBiomeProfile> BiomeTypeMap = new Dictionary<BiomeType, MiniBaseBiomeProfile>()
         {
-            { BiomeType.Sandstone, SandstoneProfile },
+            { BiomeType.Temperate, TemperateProfile },
             { BiomeType.Forest, ForestProfile },
             { BiomeType.Swamp, SwampProfile },
             { BiomeType.Frozen, FrozenProfile },
@@ -246,6 +252,8 @@ namespace MiniBase
             Ocean,
             [Option("Frozen", "Cold, cold, and more cold")]
             Frozen,
+            [Option("Oil", "A whole lot of crude")]
+            Oil,
             [Option("Metal", "Ores and metals of all varieties")]
             Metal,
             [Option("None", "No core or abyssalite border")]
@@ -257,6 +265,7 @@ namespace MiniBase
             { CoreType.Magma, MagmaCoreProfile },
             { CoreType.Ocean, OceanCoreProfile },
             { CoreType.Frozen, FrozenCoreProfile },
+            { CoreType.Oil, OilCoreProfile },
             { CoreType.Metal, MetalCoreProfile },
         };
 

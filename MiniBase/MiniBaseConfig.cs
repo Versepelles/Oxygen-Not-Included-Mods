@@ -71,11 +71,6 @@ namespace MiniBase
             FeatureType.Hydrogen,
             FeatureType.OilFissure,
             FeatureType.OilReservoir,
-            FeatureType.SmallVolcano,
-            FeatureType.Volcano,
-            FeatureType.Copper,
-            FeatureType.Gold,
-            FeatureType.Iron,
         };
 
         public static FeatureType[] RandomVolcanoFeatures =

@@ -125,6 +125,30 @@ namespace MiniBase.Profiles
                 { "Crab", 0.02f },
             });
 
+        public static MiniBaseBiomeProfile OilCoreProfile = new MiniBaseBiomeProfile(
+            null,
+            SimHashes.Diamond,
+            553f,
+            new BandInfo[]
+            {
+                new BandInfo(0.18f, SimHashes.Diamond),
+                new BandInfo(0.20f, SimHashes.Fossil),
+                new BandInfo(0.24f, SimHashes.Petroleum, density: 4.3f),
+                new BandInfo(0.28f, SimHashes.SourGas, density: 2f),
+                new BandInfo(0.50f, SimHashes.CrudeOil, density: 4.3f),
+                new BandInfo(0.52f, SimHashes.SandStone),
+                new BandInfo(0.55f, SimHashes.Fossil),
+                new BandInfo(0.59f, SimHashes.Diamond),
+                new BandInfo(0.80f, SimHashes.CrudeOil, density: 4.3f),
+                new BandInfo(0.85f, SimHashes.Lead),
+                new BandInfo(1.00f, SimHashes.Diamond),
+            },
+            spawnablesInGround:
+            new Dictionary<string, float>()
+            {
+                { "EvilFlower", 0.005f },
+            });
+
         public static MiniBaseBiomeProfile MetalCoreProfile = new MiniBaseBiomeProfile(
             null,
             SimHashes.Iron,

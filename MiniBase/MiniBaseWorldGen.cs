@@ -293,19 +293,18 @@ namespace MiniBase
                     // Create abyssalite border of size CORE_BORDER
                     for (int j = 0; j < CORE_BORDER; j++)
                         abyssaliteCells.Add(Vec(x, Bottom() + heights[x] + j));
-                    // Ensure border thickness at places where it shifts by more than one
-                    // TODO
-                    /*
-                    if(x < relativeRight - 1)
+
+                    // Ensure border thickness at high slopes
+                    if(x > relativeLeft && x < relativeRight - 1)
                         if((heights[x - 1] - heights[x] > 1) || (heights[x + 1] - heights[x] > 1))
                         {
                             Vector2I top = Vec(x, Bottom() + heights[x] + CORE_BORDER - 1);
                             abyssaliteCells.Add(top + Vec(-1, 0));
                             abyssaliteCells.Add(top + Vec(1, 0));
                             abyssaliteCells.Add(top + Vec(0, 1));
-                        }*/
+                        }
                     
-                    // Mark core
+                    // Mark core biome cells
                     for (int y = Bottom(); y < Bottom() + heights[x]; y++)
                         coreCells.Add(Vec(x, y));
                 }

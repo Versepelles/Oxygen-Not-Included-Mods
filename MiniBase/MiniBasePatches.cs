@@ -98,6 +98,7 @@ namespace MiniBase
         }
 
         // Disable Steam Turbine
+        // TODO: convert to tech tree option
         [HarmonyPatch(typeof(PlanScreen), "PopulateOrderInfo")]
         public static class PlanScreen_PopulateOrderInfo_Patch
         {
@@ -180,39 +181,42 @@ namespace MiniBase
                 // Add new care packages
                 var infoList = infoArray.ToList();
 
+                void AddElement(SimHashes element, float amount, int cycle = -1) { AddItem(ElementLoader.FindElementByHash(element).tag.ToString(), amount, cycle); }
+                void AddItem(string name, float amount, int cycle = -1) { infoList.Add(new CarePackageInfo(name, amount, cycle < 0 ? null : (Func<bool>) (() => CycleCondition(cycle)))); }
+
                 // Minerals
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.Granite).tag.ToString(), 2000f, null));
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.IgneousRock).tag.ToString(), 2000f, null));
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.Obsidian).tag.ToString(), 2000f, () => CycleCondition(24)));
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.Salt).tag.ToString(), 2000f, null));
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.BleachStone).tag.ToString(), 2000f, () => CycleCondition(12)));
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.Fossil).tag.ToString(), 1000f, () => CycleCondition(24)));
+                AddElement(SimHashes.Granite, 2000f);
+                AddElement(SimHashes.IgneousRock, 2000f);
+                AddElement(SimHashes.Obsidian, 2000f, 24);
+                AddElement(SimHashes.Salt, 2000f);
+                AddElement(SimHashes.BleachStone, 2000f, 12);
+                AddElement(SimHashes.Fossil, 1000f, 24);
                 // Metals
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.IronOre).tag.ToString(), 1000f, null));
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.FoolsGold).tag.ToString(), 1000f, () => CycleCondition(12)));
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.Wolframite).tag.ToString(), 1000f, () => CycleCondition(24)));
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.Lead).tag.ToString(), 2000f, () => CycleCondition(24)));
+                AddElement(SimHashes.IronOre, 1000f);
+                AddElement(SimHashes.FoolsGold, 1000f, 12);
+                AddElement(SimHashes.Wolframite, 1000f, 24);
+                AddElement(SimHashes.Lead, 2000f, 24);
                 // Liquids
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag.ToString(), 2000f, () => CycleCondition(12)));
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.CrudeOil).tag.ToString(), 2000f, () => CycleCondition(24)));
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.Petroleum).tag.ToString(), 2000f, () => CycleCondition(48)));
+                AddElement(SimHashes.DirtyWater, 2000f, 12);
+                AddElement(SimHashes.CrudeOil, 2000f, 12);
+                AddElement(SimHashes.Petroleum, 2000f, 48);
                 // Gases
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.ChlorineGas).tag.ToString(), 2000f, null));
-                infoList.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.Methane).tag.ToString(), 2000f, () => CycleCondition(24)));
+                AddElement(SimHashes.ChlorineGas, 2000f);
+                AddElement(SimHashes.Methane, 2000f, 24);
                 // Plants
-                infoList.Add(new CarePackageInfo("BasicSingleHarvestPlantSeed", 3f, null));             // Mealwood
-                infoList.Add(new CarePackageInfo("SeaLettuceSeed", 3f, null));                          // Waterweed
-                infoList.Add(new CarePackageInfo("BeanPlantSeed", 3f, null));                           // Nosh Bean
-                infoList.Add(new CarePackageInfo("SaltPlantSeed", 3f, null));                           // Dasha Saltvine
-                infoList.Add(new CarePackageInfo("PrickleGrassSeed", 3f, null));                        // Bluff Briar
-                infoList.Add(new CarePackageInfo("BulbPlantSeed", 3f, null));                           // Buddy Bud
-                infoList.Add(new CarePackageInfo("ColdWheatSeed", 3f, null));                           // Sleet Wheat      TODO: solve invisible sleetwheat / nosh bean
-                infoList.Add(new CarePackageInfo("GasGrassSeed", 3f, () => CycleCondition(36)));        // Gas Grass
-                infoList.Add(new CarePackageInfo("EvilFlowerSeed", 1f, () => CycleCondition(36)));      // Sporechid
+                AddItem("BasicSingleHarvestPlantSeed", 3f);             // Mealwood
+                AddItem("SeaLettuceSeed", 3f);                          // Waterweed
+                AddItem("BeanPlantSeed", 3f);                           // Nosh Bean
+                AddItem("SaltPlantSeed", 3f);                           // Dasha Saltvine
+                AddItem("PrickleGrassSeed", 3f);                        // Bluff Briar
+                AddItem("BulbPlantSeed", 3f);                           // Buddy Bud
+                AddItem("ColdWheatSeed", 3f);                           // Sleet Wheat      TODO: solve invisible sleetwheat / nosh bean
+                AddItem("GasGrassSeed", 3f, 36);                        // Gas Grass
+                AddItem("EvilFlowerSeed", 1f, 36);                      // Sporechid
                 // Critters
-                infoList.Add(new CarePackageInfo("PacuEgg", 3f, null));                                 // Pacu
-                infoList.Add(new CarePackageInfo("Glom", 1f, () => CycleCondition(24)));                // Morb
-                infoList.Add(new CarePackageInfo("Moo", 1f, () => CycleCondition(48)));                 // Gassy Moo
+                AddItem("PacuEgg", 3f);                                 // Pacu
+                AddItem("Glom", 1f, 24);                                // Morb
+                AddItem("Moo", 1f, 48);                                 // Gassy Moo
 
                 carePackagesField.SetValue(infoList.ToArray());
             }

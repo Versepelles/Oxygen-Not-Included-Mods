@@ -2,87 +2,75 @@
 using PeterHan.PLib;
 using PeterHan.PLib.Options;
 using System.Collections.Generic;
-using UnityEngine;
 using static MiniBase.Profiles.MiniBaseBiomeProfiles;
 using static MiniBase.Profiles.MiniBaseCoreBiomeProfiles;
 
 namespace MiniBase
 {
+    [ConfigFile("config.json", true)]
     [JsonObject(MemberSerialization.OptIn)]
     public class MiniBaseOptions : POptions.SingletonOptions<MiniBaseOptions>
     {
-        [Option("These options are only applied when the map is generated,\nexcept for Steam Turbines and Care Packages.\n ")]
-        public LocText Header { get; }
+        private const string WorldGenCategory = "These options are only applied when the map is generated.";
+        private const string AnytimeCategory = "These options can be changed at any time.";
+        private const string CustomSizeCategory = "These options only apply if 'Map Size' is set to 'Custom'.";
 
-        [Option("Western Feature", "The geyser, vent, or volcano on the left side of the map.")]
+        [Option("Western Feature", "The geyser, vent, or volcano on the left side of the map.", WorldGenCategory)]
         [JsonProperty]
         public FeatureType FeatureWest { get; set; }
 
-        [Option("Eastern Feature", "The geyser, vent, or volcano on the right side of the map.")]
+        [Option("Eastern Feature", "The geyser, vent, or volcano on the right side of the map.", WorldGenCategory)]
         [JsonProperty]
         public FeatureType FeatureEast { get; set; }
 
-        [Option("Core Feature", "The geyser, vent, or volcano at the bottom of the map.\nInaccessible until the abyssalite boundary is breached.")]
+        [Option("Core Feature", "The geyser, vent, or volcano at the bottom of the map.\nInaccessible until the abyssalite boundary is breached.", WorldGenCategory)]
         [JsonProperty]
         public FeatureType FeatureSouth { get; set; }
 
-        [Option("Size", "The dimensions of the buildable area.")]
+        [Option("Map Size", "The size of the liveable area.", WorldGenCategory)]
         [JsonProperty]
         public BaseSize Size { get; set; }
 
-        [Option("Biome", "The main biome of the map.\nDetermines available resources, flora, and fauna.")]
+        [Option("Main Biome", "The main biome of the map.\nDetermines available resources, flora, and fauna.", WorldGenCategory)]
         [JsonProperty]
         public BiomeType Biome { get; set; }
 
-        //[Option("Side Biomes", "The areas outside the liveable area.\nThis is a purely aesthetic option.")]
+        //[Option("Side Biomes", "The areas outside the liveable area.\nThis is a purely aesthetic option.", WorldGenCategory)]
         //[JsonProperty]
         public SideType SideBiome { get; set; }
 
-        [Option("Planet Core", "The auxiliary biome at the bottom of the map.\nProtected by a layer of abyssalite.")]
+        [Option("Core Biome", "The auxiliary biome at the bottom of the liveable area.\nProtected by a layer of abyssalite.", WorldGenCategory)]
         [JsonProperty]
         public CoreType CoreBiome { get; set; }
         
-        [Option("Resource Density", "Modifies the density of available resources.")]
+        [Option("Resource Density", "Modifies the density of available resources.", WorldGenCategory)]
         [JsonProperty]
         public ResourceModifier ResourceMod { get; set; }
 
-        [Option("Space Access", "Allows renewable resources to be collected from meteorites.\nDoes not increase the building area.")]
+        [Option("Space Access", "Allows renewable resources to be collected from meteorites.\nDoes not significantly increase the liveable area.", WorldGenCategory)]
         [JsonProperty]
         public bool SpaceAccess { get; set; }
 
-        [Option("Disable Steam Turbines", "Prevents steam turbines from being built.\nAlternative cooling methods will be required.")]
+        [Option("Disable Steam Turbines", "Prevents steam turbines from being built.\nAlternative cooling methods will be required.", AnytimeCategory)]
         [JsonProperty]
         public bool TurbinesDisabled { get; set; }
 
-        [Option("Care Package Frequency", "Frequency of care package drops in cycles.\nMay not update until the next delivery.")]
+        [Option("Care Package Drops (Cycles)", "Period of care package drops, in cycles.", AnytimeCategory)]
         [Limit(1, 10)]
         [JsonProperty]
         public int CarePackageFrequency { get; set; }
 
-        private const string CustomSizeCategory = "These options only apply if the 'Size' option is set to 'Custom'.";
-
-        [Option("Custom Width", "Only works if the 'Size' option is set to 'Custom'.", CustomSizeCategory)]
+        [Option("Custom Width", "Only applies if the 'Map Size' option is set to 'Custom'.", CustomSizeCategory)]
         [Limit(20, 100)]
         [JsonProperty]
         public int CustomWidth { get; set; }
 
-        [Option("Custom Height", "Only works if the 'Size' option is set to 'Custom'.", CustomSizeCategory)]
+        [Option("Custom Height", "Only applies if the 'Map Size' option is set to 'Custom'.", CustomSizeCategory)]
         [Limit(20, 100)]
         [JsonProperty]
         public int CustomHeight { get; set; }
 
-        // TODO: Reset to defaults button
-        /*
-        [Option("Reset to Defaults")]
-        public readonly System.Action ResetButton = () => { Instance.Reset(); };
-        */
-
         public MiniBaseOptions()
-        {
-            ResetToDefaults();
-        }
-
-        private void ResetToDefaults()
         {
             CustomWidth = 70;
             CustomHeight = 40;
@@ -96,7 +84,7 @@ namespace MiniBase
             ResourceMod = ResourceModifier.Normal;
             SpaceAccess = true;
             TurbinesDisabled = true;
-            CarePackageFrequency = 3;
+            CarePackageFrequency = 2;
         }
 
         public static void Reload()

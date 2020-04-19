@@ -65,13 +65,9 @@ namespace MiniBase
             var templateSpawnTargets = new List<KeyValuePair<Vector2I, TemplateContainer>>();
             TemplateContainer startingBaseTemplate = TemplateCache.GetStartingBaseTemplate(worldGen.Settings.world.startingBaseTemplate);
             startingBaseTemplate.pickupables.Clear(); // Remove stray hatch
-            var rationBox = startingBaseTemplate.buildings.Find(b => b.id == "RationBox");
+            var itemPos = new Vector2I(3, 1);
             foreach (var entry in biomeProfile.startingItems)
-                rationBox.storage.Add(new StorageItem() // Add starting items to the ration box. Non-food items will appear on the ground
-                {
-                    id = entry.Key,
-                    units = entry.Value,
-                });
+                startingBaseTemplate.pickupables.Add(new Prefab(entry.Key, Prefab.Type.Pickupable, itemPos.x, itemPos.y, (SimHashes) 0, _units: entry.Value));
             foreach (Cell cell in startingBaseTemplate.cells)
                 if (cell.element == SimHashes.SandStone || cell.element == SimHashes.Algae)
                     cell.element = biomeProfile.defaultMaterial;

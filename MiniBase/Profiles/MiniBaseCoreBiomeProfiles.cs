@@ -146,7 +146,7 @@ namespace MiniBase.Profiles
             spawnablesInGround:
             new Dictionary<string, float>()
             {
-                { "EvilFlower", 0.005f },
+                { "EvilFlowerSeed", 0.005f },
             });
 
         public static MiniBaseBiomeProfile MetalCoreProfile = new MiniBaseBiomeProfile(
@@ -172,7 +172,7 @@ namespace MiniBase.Profiles
                 new BandInfo(0.77f, SimHashes.Lead),
                 new BandInfo(0.82f, SimHashes.GoldAmalgam),
                 new BandInfo(0.85f, SimHashes.MaficRock),
-                new BandInfo(1.00f, SimHashes.Copper),
+                new BandInfo(1.00f, SimHashes.Cuprite),
             });
     }
 }

@@ -11,7 +11,7 @@ namespace MiniBase.Profiles
             -1f,
             new BandInfo[]
             {
-                new BandInfo(0.25f, SimHashes.Water),
+                new BandInfo(0.23f, SimHashes.Water),
                 new BandInfo(0.30f, SimHashes.Oxygen, density: 2f),
                 new BandInfo(0.35f, SimHashes.Dirt),
                 new BandInfo(0.40f, SimHashes.Algae, density: 4f),
@@ -55,7 +55,6 @@ namespace MiniBase.Profiles
                 { "SwampLilySeed", 0.005f },
                 { "BasicFabricMaterialPlantSeed", 0.005f },
                 { "ColdBreatherSeed", 0.001f },
-                { "EvilFlowerSeed", 0.001f },
             },
             spawnablesInAir:
             new Dictionary<string, float>()
@@ -75,8 +74,8 @@ namespace MiniBase.Profiles
             -1f,
             new BandInfo[]
             {
-                new BandInfo(0.25f, SimHashes.Water),
-                new BandInfo(0.27f, SimHashes.CarbonDioxide),
+                new BandInfo(0.23f, SimHashes.Water),
+                new BandInfo(0.26f, SimHashes.CarbonDioxide),
                 new BandInfo(0.30f, SimHashes.Oxygen, density: 2f),
                 new BandInfo(0.35f, SimHashes.AluminumOre),
                 new BandInfo(0.38f, SimHashes.Carbon),
@@ -121,7 +120,6 @@ namespace MiniBase.Profiles
                 { "SwampLilySeed", 0.003f },
                 { "BasicFabricMaterialPlantSeed", 0.003f },
                 { "ColdBreatherSeed", 0.001f },
-                { "EvilFlowerSeed", 0.001f },
             },
             spawnablesInAir:
             new Dictionary<string, float>()
@@ -141,7 +139,7 @@ namespace MiniBase.Profiles
             303f,
             new BandInfo[]
             {
-                new BandInfo(0.23f, SimHashes.Water, 310f),
+                new BandInfo(0.22f, SimHashes.Water, 310f),
                 new BandInfo(0.27f, SimHashes.Oxygen, density: 2f),
                 new BandInfo(0.30f, SimHashes.SlimeMold, disease: SLIMELUNG),
                 new BandInfo(0.32f, SimHashes.Clay),
@@ -190,7 +188,6 @@ namespace MiniBase.Profiles
                 { "SpiceVineSeed", 0.003f },
                 { "SaltPlantSeed", 0.002f },
                 { "OxyfernSeed", 0.002f },
-                { "EvilFlowerSeed", 0.001f },
             },
             spawnablesInAir:
             new Dictionary<string, float>()
@@ -271,11 +268,11 @@ namespace MiniBase.Profiles
             313f,
             new BandInfo[]
             {
-                new BandInfo(0.14f, SimHashes.CrudeOil, 373f, density: 4.3f),
-                new BandInfo(0.16f, SimHashes.Water, 373f),
-                new BandInfo(0.18f, SimHashes.Water, 333f),
-                new BandInfo(0.20f, SimHashes.Water, 313f),
-                new BandInfo(0.22f, SimHashes.Water, 303f),
+                new BandInfo(0.13f, SimHashes.CrudeOil, 373f, density: 4.3f),
+                new BandInfo(0.15f, SimHashes.Water, 373f),
+                new BandInfo(0.17f, SimHashes.Water, 333f),
+                new BandInfo(0.19f, SimHashes.Water, 313f),
+                new BandInfo(0.20f, SimHashes.Water, 303f),
                 new BandInfo(0.25f, SimHashes.Oxygen, density: 2f),
                 new BandInfo(0.30f, SimHashes.Carbon, density: 2f),
                 new BandInfo(0.34f, SimHashes.Fossil),
@@ -322,7 +319,6 @@ namespace MiniBase.Profiles
                 { "BasicForagePlant", 0.010f },
                 { "BasicSingleHarvestPlantSeed", 0.010f },
                 { "CactusPlantSeed", 0.005f },
-                { "EvilFlowerSeed", 0.003f },
             },
             spawnablesInAir:
             new Dictionary<string, float>()
@@ -343,7 +339,8 @@ namespace MiniBase.Profiles
             283f,
             new BandInfo[]
             {
-                new BandInfo(0.20f, SimHashes.Water),
+                new BandInfo(0.19f, SimHashes.Water),
+                new BandInfo(0.21f, SimHashes.CarbonDioxide, density: 2f),
                 new BandInfo(0.27f, SimHashes.Oxygen, density: 2f),
                 new BandInfo(0.30f, SimHashes.IgneousRock),
                 new BandInfo(0.36f, SimHashes.IronOre, density: 2f),
@@ -372,7 +369,6 @@ namespace MiniBase.Profiles
                 { "Hatch", 0.002f },
                 { "HatchHard", 0.008f },
                 { "BasicSingleHarvestPlantSeed", 0.003f },
-                { "EvilFlowerSeed", 0.003f },
             });
 
         public static MiniBaseBiomeProfile StrangeProfile = new MiniBaseBiomeProfile(
@@ -493,7 +489,6 @@ namespace MiniBase.Profiles
                 { "SwampLilySeed", 0.005f },
                 { "BasicFabricMaterialPlantSeed", 0.005f },
                 { "ColdBreatherSeed", 0.001f },
-                { "EvilFlowerSeed", 0.001f },
             });
     }
 }

@@ -427,7 +427,7 @@ namespace MiniBase
 
             // Base
             for (int x = pos.x - 1; x < pos.x + 3; x++)
-                cells[Grid.XYToCell(x, pos.y - 1)].SetValues(WorldGen.katairiteElement, ElementLoader.elements);
+                cells[Grid.XYToCell(x, pos.y - 1)].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
 
             // Cover feature
             for (int x = pos.x; x < pos.x + 2; x++)

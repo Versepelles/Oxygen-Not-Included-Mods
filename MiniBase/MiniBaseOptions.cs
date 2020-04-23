@@ -72,9 +72,9 @@ namespace MiniBase
 
         public MiniBaseOptions()
         {
-            FeatureWest = FeatureType.CoolSlush;
+            FeatureWest = FeatureType.PollutedWater;
             FeatureEast = FeatureType.RandomUseful;
-            FeatureSouth = FeatureType.None;
+            FeatureSouth = FeatureType.OilReservoir;
             Biome = BiomeType.Temperate;
             CoreBiome = CoreType.Magma;
             SideBiome = SideType.Space;
@@ -83,7 +83,7 @@ namespace MiniBase
             Size = BaseSize.Normal;
             CustomWidth = 70;
             CustomHeight = 40;
-            TurbinesDisabled = true;
+            TurbinesDisabled = false;
             CarePackageFrequency = 2;
         }
 

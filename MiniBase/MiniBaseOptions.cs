@@ -69,7 +69,7 @@ namespace MiniBase
         [Limit(1, 10)]
         [JsonProperty]
         public int CarePackageFrequency { get; set; }
-
+        
         public MiniBaseOptions()
         {
             FeatureWest = FeatureType.PollutedWater;

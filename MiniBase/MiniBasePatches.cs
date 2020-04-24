@@ -123,13 +123,16 @@ namespace MiniBase
         {
             private static void Prefix(Immigration __instance)
             {
+                if (DEBUG_MODE && FAST_IMMIGRATION)
+                {
+                    __instance.spawnInterval = new float[] { 10f, 5f };
+                    return;
+                }
                 if (!IsMiniBase())
                     return;
                 Log("Immigration_OnPrefabInit_Patch Prefix");
                 float frequency = MiniBaseOptions.Instance.CarePackageFrequency * 600f;
                 __instance.spawnInterval = new float[] { frequency, frequency };
-                if (FAST_IMMIGRATION)
-                    __instance.spawnInterval = new float[] { 10f, 5f };
             }
         }
         
@@ -229,7 +232,6 @@ namespace MiniBase
 
         // This code was edited and used with permission from asquared31415 and is subject to their licenses and rights
         // The complete unedited code and project can be found at https://github.com/asquared31415/ONI-Mods/tree/dev/src/ConfigurablePrintingPod
-        // TODO: limit to only work when MiniBase active
         [HarmonyPatch(typeof(CharacterSelectionController), "InitializeContainers")]
         public class CharacterSelectionControler_InitializeContainers_Patches
         {
@@ -255,8 +257,6 @@ namespace MiniBase
 
             public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> orig)
             {
-                if (!IsMiniBase())
-                    return orig;
                 var codes = orig.ToList();
 
                 var label = new Label();
@@ -289,6 +289,7 @@ namespace MiniBase
                             codes.Insert(i++, new CodeInstruction(OpCodes.Stfld, TargetPackageOptions));
 
                             codes.Insert(i++, new CodeInstruction(OpCodes.Ldarg_0));
+                            codes.Insert(i++, new CodeInstruction(OpCodes.Ldarg_0));
                             codes.Insert(i++, new CodeInstruction(OpCodes.Call, DupeCount));
                             codes.Insert(i, new CodeInstruction(OpCodes.Stfld, TargetDupeOptions));
                         }
@@ -305,8 +306,21 @@ namespace MiniBase
                 return codes;
             }
 
-            private static int GetRandomPackageCount() { return 3; }
-            private static int GetRandomDuplicantCount() { return 1; }
+            private static int GetRandomPackageCount()
+            {
+                Log("Care packages IsMiniBase: " + IsMiniBase());
+                if(IsMiniBase())
+                    return 3;
+                return UnityEngine.Random.Range(0, 101) > 70 ? 2 : 1;
+            }
+
+            private static int GetRandomDuplicantCount(CharacterSelectionController instance)
+            {
+                Log("Duplicant packages IsMiniBase: " + IsMiniBase());
+                if (IsMiniBase())
+                    return 1;
+                return 4 - ((int) TargetPackageOptions.GetValue(instance));
+            }
         }
 
         #endregion

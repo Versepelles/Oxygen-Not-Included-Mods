@@ -1,16 +1,33 @@
-﻿using System;
+﻿using Klei.CustomSettings;
+using System;
 using UnityEngine;
 using static MiniBase.MiniBaseConfig;
 
 namespace MiniBase
 {
-    class MiniBaseDebugUtils
+    class MiniBaseUtils
     {
+        public static bool IsMiniBase()
+        {
+            bool b;
+            try
+            {
+                b = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id == ("worlds/" + MiniBasePatches.Db_Initialize_Patch.Name);
+            }
+            catch
+            {
+                return false;
+            }
+            return b;
+        }
+
         public static void Log(String msg)
         {
             if (DEBUG_MODE)
                 Console.WriteLine("<MiniBase> " + msg);
         }
+
+        #region Debug
 
         public static void TestNoiseMaps()
         {
@@ -46,5 +63,7 @@ namespace MiniBase
             str += div;
             Log(str);
         }
+
+        #endregion
     }
 }

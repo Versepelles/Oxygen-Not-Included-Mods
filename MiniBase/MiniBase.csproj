@@ -63,6 +63,10 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
@@ -71,7 +75,7 @@
     <Compile Include="MiniBaseBiomeProfile.cs" />
     <Compile Include="Profiles\MiniBaseBiomeProfiles.cs" />
     <Compile Include="Profiles\MiniBaseCoreBiomeProfiles.cs" />
-    <Compile Include="MiniBaseDebugUtils.cs" />
+    <Compile Include="MiniBaseUtils.cs" />
     <Compile Include="MiniBaseWorldGen.cs" />
     <Compile Include="MiniBaseOptions.cs" />
     <Compile Include="MiniBasePatches.cs" />

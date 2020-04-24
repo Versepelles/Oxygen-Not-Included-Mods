@@ -11,7 +11,7 @@ using Delaunay.Geo;
 using VoronoiTree;
 using TemplateClasses;
 using static MiniBase.MiniBaseConfig;
-using static MiniBase.MiniBaseDebugUtils;
+using static MiniBase.MiniBaseUtils;
 
 namespace MiniBase
 {

@@ -32,34 +32,27 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 using static MiniBase.MiniBaseConfig;
-using static MiniBase.MiniBaseDebugUtils;
+using static MiniBase.MiniBaseUtils;
+using UnityEngine;
+using System.IO;
 
 namespace MiniBase
 {
     public class MiniBasePatches
     {
+        public static string ModPath;
+
         public static class Mod_OnLoad
         {
-            public static void OnLoad()
+            public static void OnLoad(string modPath)
             {
-                Log("TinyWorld loaded.");
+                Log($"MiniBase loaded.");
+                ModPath = modPath;
                 POptions.RegisterOptions(typeof(MiniBaseOptions));
 
                 // Noisemap test
                 if (TEST_NOISEMAPS)
                     TestNoiseMaps();
-            }
-        }
-
-        // Change world size
-        [HarmonyPatch(typeof(Worlds), "UpdateWorldCache")]
-        public static class Worlds_UpdateWorldCache_Patch
-        {
-            private static void Postfix(Worlds __instance)
-            {
-                Log("Worlds_UpdateWorldCache_Patch Postfix");
-                foreach (ProcGen.World world in __instance.worldCache.Values)
-                    Traverse.Create(world).Property("worldsize").SetValue(new Vector2I(WORLD_WIDTH, WORLD_HEIGHT));
             }
         }
 
@@ -91,6 +84,8 @@ namespace MiniBase
         {
             private static void Postfix()
             {
+                if (!IsMiniBase())
+                    return;
                 Log("MinionSelectScreen_OnProceed_Patch Postfix");
                 float radius = Math.Max(Grid.WidthInCells, Grid.HeightInCells) * 1.5f;
                 GridVisibility.Reveal(0, 0, radius, radius - 1);
@@ -104,7 +99,9 @@ namespace MiniBase
         {
             private static void Prefix(HashedString category, ref object data)
             {
-                if((category == new HashedString("Power")) && (data.GetType() != typeof(PlanScreen.PlanInfo)))
+                if (!IsMiniBase())
+                    return;
+                if ((category == new HashedString("Power")) && (data.GetType() != typeof(PlanScreen.PlanInfo)))
                 {
                     Log("PlanScreen_PopulateOrderInfo_Patch Prefix");
                     var list = new List<string>((List<string>) data); // Shallow copy
@@ -126,6 +123,8 @@ namespace MiniBase
         {
             private static void Prefix(Immigration __instance)
             {
+                if (!IsMiniBase())
+                    return;
                 Log("Immigration_OnPrefabInit_Patch Prefix");
                 float frequency = MiniBaseOptions.Instance.CarePackageFrequency * 600f;
                 __instance.spawnInterval = new float[] { frequency, frequency };
@@ -140,6 +139,8 @@ namespace MiniBase
         {
             private static void Postfix(Immigration __instance)
             {
+                if (!IsMiniBase())
+                    return;
                 if (__instance.GetType() == typeof(Immigration))
                 {
                     Log("Immigration_OnSpawn_Patch Postfix");
@@ -155,6 +156,8 @@ namespace MiniBase
         {
             private static void Postfix(Immigration __instance)
             {
+                if (!IsMiniBase())
+                    return;
                 Log("Immigration_ConfigureCarePackages_Patch Postfix");
 
                 var carePackagesField = Traverse.Create(__instance).Field("carePackages");
@@ -226,6 +229,7 @@ namespace MiniBase
 
         // This code was edited and used with permission from asquared31415 and is subject to their licenses and rights
         // The complete unedited code and project can be found at https://github.com/asquared31415/ONI-Mods/tree/dev/src/ConfigurablePrintingPod
+        // TODO: limit to only work when MiniBase active
         [HarmonyPatch(typeof(CharacterSelectionController), "InitializeContainers")]
         public class CharacterSelectionControler_InitializeContainers_Patches
         {
@@ -251,6 +255,8 @@ namespace MiniBase
 
             public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> orig)
             {
+                if (!IsMiniBase())
+                    return orig;
                 var codes = orig.ToList();
 
                 var label = new Label();
@@ -307,6 +313,40 @@ namespace MiniBase
 
         #region WorldGen
 
+        // Add minibase asteroid type
+        [HarmonyPatch(typeof(Db), "Initialize")]
+        public class Db_Initialize_Patch
+        {
+            public static string Name = "MiniBase";
+            private static string Description = "An encapsulated location with just enough to get by.\n\n<smallcaps>Customize this location by clicking MiniBase Options in the Mods menu.</smallcaps>\n\n";
+            private static string IconName = "Asteroid_minibase";
+
+            public static void Prefix()
+            {
+                Log("Db_Initialize_Patch Prefix");
+                Strings.Add($"STRINGS.WORLDS." + Name.ToUpperInvariant() + ".NAME", Name);
+                Strings.Add($"STRINGS.WORLDS." + Name.ToUpperInvariant() + ".DESCRIPTION", Description);
+
+                string spritePath = System.IO.Path.Combine(ModPath, IconName) + ".png";
+                Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                ImageConversion.LoadImage(texture, File.ReadAllBytes(spritePath));
+                Sprite sprite = Sprite.Create(texture, new Rect(0f, 0f, 512f, 512f), Vector2.zero);
+                Assets.Sprites.Add(IconName, sprite);
+            }
+        }
+
+        // Change minibase world size
+        [HarmonyPatch(typeof(Worlds), "UpdateWorldCache")]
+        public static class Worlds_UpdateWorldCache_Patch
+        {
+            private static void Postfix(Worlds __instance)
+            {
+                Log("Worlds_UpdateWorldCache_Patch Postfix");
+                var world = __instance.worldCache["worlds/" + Db_Initialize_Patch.Name];
+                Traverse.Create(world).Property("worldsize").SetValue(new Vector2I(WORLD_WIDTH, WORLD_HEIGHT));
+            }
+        }
+
         // Bypass and rewrite world generation
         [HarmonyPatch(typeof(WorldGen), "RenderOffline")]
         public static class WorldGen_RenderOffline_Patch
@@ -315,16 +355,38 @@ namespace MiniBase
             {
                 Log("WorldGen_RenderOffline_Patch Prefix");
                 // Skip the original method
-                return false;
+                return !IsMiniBase();
             }
 
             private static void Postfix(WorldGen __instance, Sim.Cell[] __result, ref Sim.DiseaseCell[] dc)
             {
+                if (!IsMiniBase())
+                    return;
                 Log("WorldGen_RenderOffline_Patch Postfix");
                 __result = MiniBaseWorldGen.CreateWorld(__instance, ref dc);
             }
         }
 
+        #endregion
+
+        #region Debug
+        /*
+        // test
+        [HarmonyPatch(typeof(WorldGen), "GenerateLayout")]
+        public static class WorldGen_GenerateLayout_Patch
+        {
+            private static bool Prefix()
+            {
+                Log("WorldGen_GenerateLayout_Patch Prefix");
+                return false;
+            }
+
+            private static void Postfix(ref bool __result)
+            {
+                Log("WorldGen_GenerateLayout_Patch Postfix");
+                __result = true;
+            }
+        }*/
         #endregion
     }
 }

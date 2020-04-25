@@ -5,7 +5,7 @@ kanimal-cli.pdb
 **/Art Source/*/output/
 TestMod/
 MiniBase/PLib/
-
+packages.config
 
 
 ## Ignore Visual Studio temporary files, build results, and

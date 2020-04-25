@@ -22,7 +22,7 @@ namespace MiniBase
         public static string SLIMELUNG = WorldGen.diseaseIds[1];
 
         // DEBUG
-        public static bool DEBUG_MODE = true;
+        public static bool DEBUG_MODE = false;
         public static bool FAST_IMMIGRATION = false;
         public static bool TEST_NOISEMAPS = false;
         public static bool SKIP_LIVEABLE_AREA = false;

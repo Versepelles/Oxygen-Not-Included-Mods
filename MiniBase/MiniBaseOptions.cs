@@ -231,6 +231,8 @@ namespace MiniBase
             Barren,
             [Option("Str?nge", "#%*@&#^$%(_#$&%^#@*&")]
             Strange,
+            [Option("Deep Essence", "Filled with vibes")]
+            DeepEssence,
         }
 
         private static Dictionary<BiomeType, MiniBaseBiomeProfile> BiomeTypeMap = new Dictionary<BiomeType, MiniBaseBiomeProfile>()
@@ -242,6 +244,7 @@ namespace MiniBase
             { BiomeType.Desert, DesertProfile },
             { BiomeType.Barren, BarrenProfile },
             { BiomeType.Strange, StrangeProfile },
+            { BiomeType.DeepEssence, DeepEssenceProfile },
         };
 
         public enum CoreType
@@ -256,6 +259,14 @@ namespace MiniBase
             Oil,
             [Option("Metal", "Ores and metals of all varieties")]
             Metal,
+            [Option("Fertile", "Dirt, water, algae, and iron")]
+            Fertile,
+            [Option("Boneyard", "Cool remains of an ancient world")]
+            Boneyard,
+            [Option("Aesthetic", "Filled with  V I B E S")]
+            Aesthetic,
+            [Option("Pearl Inferno", "Molten inferno of aluminum, glass, steam, \nand some high temperature materials")]
+            Pearl,
             [Option("None", "No core or abyssalite border")]
             None,
         }
@@ -267,6 +278,10 @@ namespace MiniBase
             { CoreType.Frozen, FrozenCoreProfile },
             { CoreType.Oil, OilCoreProfile },
             { CoreType.Metal, MetalCoreProfile },
+            { CoreType.Fertile, FertileCoreProfile },
+            { CoreType.Boneyard, BoneyardCoreProfile },
+            { CoreType.Aesthetic, AestheticCoreProfile },
+            { CoreType.Pearl, PearlCoreProfile },
         };
 
         public enum ResourceModifier

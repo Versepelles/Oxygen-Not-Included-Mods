@@ -46,13 +46,9 @@ namespace MiniBase
         {
             public static void OnLoad(string modPath)
             {
-                Log($"MiniBase loaded.");
+                Log($"MiniBase loaded.", true);
                 ModPath = modPath;
                 POptions.RegisterOptions(typeof(MiniBaseOptions));
-
-                // Noisemap test
-                if (TEST_NOISEMAPS)
-                    TestNoiseMaps();
             }
         }
 
@@ -123,7 +119,7 @@ namespace MiniBase
         {
             private static void Prefix(Immigration __instance)
             {
-                if (DEBUG_MODE && FAST_IMMIGRATION)
+                if (MiniBaseOptions.Instance.FastImmigration)
                 {
                     __instance.spawnInterval = new float[] { 10f, 5f };
                     return;
@@ -142,9 +138,7 @@ namespace MiniBase
         {
             private static void Postfix(Immigration __instance)
             {
-                if (!IsMiniBase())
-                    return;
-                if (__instance.GetType() == typeof(Immigration))
+                if (__instance.GetType() == typeof(Immigration) && IsMiniBase())
                 {
                     Log("Immigration_OnSpawn_Patch Postfix");
                     float frequency = MiniBaseOptions.Instance.CarePackageFrequency * 600f;
@@ -157,38 +151,17 @@ namespace MiniBase
         [HarmonyPatch(typeof(Immigration), "ConfigureCarePackages")]
         public static class Immigration_ConfigureCarePackages_Patch
         {
-            private static void Postfix(Immigration __instance)
+            private static void Postfix(Immigration __instance, ref CarePackageInfo[]  ___carePackages)
             {
+                Log("Immigration_ConfigureCarePackages_Patch Postfix");
                 if (!IsMiniBase())
                     return;
-                Log("Immigration_ConfigureCarePackages_Patch Postfix");
-
-                var carePackagesField = Traverse.Create(__instance).Field("carePackages");
-                var infoArray = carePackagesField.GetValue<CarePackageInfo[]>();
-
-                // Remove the "discovered" requirement for these materials
-                var RemoveConditionPackages = new List<string>
-                {
-                    "Cuprite",
-                    "GoldAmalgam",
-                    "Copper",
-                    "Iron",
-                    "Ethanol",
-                    "AluminumOre",
-                };
-
-                for (int i = 0; i < infoArray.Length; i ++)
-                {
-                    var info = infoArray[i];
-                    if (RemoveConditionPackages.Contains(info.id))
-                        infoArray[i] = new CarePackageInfo(info.id, info.quantity, () => GameClock.Instance.GetCycle() >= 32);
-                }
 
                 // Add new care packages
-                var infoList = infoArray.ToList();
+                var packageList = ___carePackages.ToList();
 
                 void AddElement(SimHashes element, float amount, int cycle = -1) { AddItem(ElementLoader.FindElementByHash(element).tag.ToString(), amount, cycle); }
-                void AddItem(string name, float amount, int cycle = -1) { infoList.Add(new CarePackageInfo(name, amount, cycle < 0 ? null : (Func<bool>) (() => CycleCondition(cycle)))); }
+                void AddItem(string name, float amount, int cycle = -1) { packageList.Add(new CarePackageInfo(name, amount, cycle < 0 ? IsMiniBase : (Func<bool>) (() => CycleCondition(cycle) && IsMiniBase()))); }
 
                 // Minerals
                 AddElement(SimHashes.Granite, 2000f);
@@ -200,31 +173,30 @@ namespace MiniBase
                 // Metals
                 AddElement(SimHashes.IronOre, 1000f);
                 AddElement(SimHashes.FoolsGold, 1000f, 12);
-                AddElement(SimHashes.Wolframite, 1000f, 24);
-                AddElement(SimHashes.Lead, 2000f, 24);
+                AddElement(SimHashes.Wolframite, 500f, 24);
+                AddElement(SimHashes.Lead, 1000f, 36);
+                AddElement(SimHashes.AluminumOre, 500f, 24);
                 // Liquids
                 AddElement(SimHashes.DirtyWater, 2000f, 12);
-                AddElement(SimHashes.CrudeOil, 2000f, 12);
-                AddElement(SimHashes.Petroleum, 2000f, 48);
+                AddElement(SimHashes.CrudeOil, 1000f, 24);
+                AddElement(SimHashes.Petroleum, 1000f, 48);
                 // Gases
-                AddElement(SimHashes.ChlorineGas, 2000f);
-                AddElement(SimHashes.Methane, 2000f, 24);
+                AddElement(SimHashes.ChlorineGas, 1000f);
+                AddElement(SimHashes.Methane, 1000f, 24);
                 // Plants
-                AddItem("BasicSingleHarvestPlantSeed", 3f);             // Mealwood
+                AddItem("BasicSingleHarvestPlantSeed", 4f);             // Mealwood
                 AddItem("SeaLettuceSeed", 3f);                          // Waterweed
-                AddItem("BeanPlantSeed", 3f);                           // Nosh Bean
                 AddItem("SaltPlantSeed", 3f);                           // Dasha Saltvine
                 AddItem("PrickleGrassSeed", 3f);                        // Bluff Briar
                 AddItem("BulbPlantSeed", 3f);                           // Buddy Bud
-                AddItem("ColdWheatSeed", 3f);                           // Sleet Wheat      TODO: solve invisible sleetwheat / nosh bean
-                AddItem("GasGrassSeed", 3f, 36);                        // Gas Grass
+                AddItem("ColdWheatSeed", 8f);                           // Sleet Wheat      TODO: solve invisible sleetwheat / nosh bean
+                AddItem("BeanPlantSeed", 5f);                           // Nosh Bean
                 AddItem("EvilFlowerSeed", 1f, 36);                      // Sporechid
                 // Critters
                 AddItem("PacuEgg", 3f);                                 // Pacu
                 AddItem("Glom", 1f, 24);                                // Morb
-                AddItem("Moo", 1f, 48);                                 // Gassy Moo
 
-                carePackagesField.SetValue(infoList.ToArray());
+                ___carePackages = packageList.ToArray();
             }
 
             private static bool CycleCondition(int cycle) { return GameClock.Instance.GetCycle() >= cycle; }

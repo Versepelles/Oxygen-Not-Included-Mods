@@ -286,8 +286,7 @@ namespace MiniBase.Profiles
             spawnablesInAir:
             new Dictionary<string, float>()
             {
-                { "LightBugPurple", 0.015f },
-                { "LightBugBlack", 0.015f },
+                { "LightBugPurple", 0.030f },
             });
 
         public static MiniBaseBiomeProfile PearlCoreProfile = new MiniBaseBiomeProfile(

@@ -1,5 +1,6 @@
 ﻿using Klei.CustomSettings;
 using System;
+using System.Diagnostics;
 using UnityEngine;
 using static MiniBase.MiniBaseConfig;
 
@@ -9,21 +10,26 @@ namespace MiniBase
     {
         public static bool IsMiniBase()
         {
-            bool b;
+            bool b = false;
             try
             {
+                /*
+                if(MiniBaseOptions.Instance.DebugMode)
+                    Log($"Checking IsMiniBase from {new StackTrace().GetFrame(1).GetMethod().DeclaringType.FullName}");
+                */
                 b = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id == ("worlds/" + MiniBasePatches.Db_Initialize_Patch.Name);
             }
             catch
             {
+                Log($"Checking IsMiniBase Error");
                 return false;
             }
             return b;
         }
 
-        public static void Log(String msg)
+        public static void Log(String msg, bool force = false)
         {
-            if (DEBUG_MODE)
+            if (force || MiniBaseOptions.Instance.DebugMode)
                 Console.WriteLine("<MiniBase> " + msg);
         }
 

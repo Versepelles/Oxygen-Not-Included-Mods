@@ -69,7 +69,18 @@ namespace MiniBase
         [Limit(1, 10)]
         [JsonProperty]
         public int CarePackageFrequency { get; set; }
-        
+
+        #region Debug
+
+        [JsonProperty]
+        public bool DebugMode;
+        [JsonProperty]
+        public bool FastImmigration;
+        [JsonProperty]
+        public bool SkipLiveableArea;
+
+        #endregion
+
         public MiniBaseOptions()
         {
             FeatureWest = FeatureType.PollutedWater;
@@ -85,6 +96,10 @@ namespace MiniBase
             CustomHeight = 40;
             TurbinesDisabled = false;
             CarePackageFrequency = 2;
+
+            DebugMode = false;
+            FastImmigration = false;
+            SkipLiveableArea = false;
         }
 
         public static void Reload()

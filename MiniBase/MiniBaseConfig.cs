@@ -21,12 +21,6 @@ namespace MiniBase
         public static string FOOD_POISONING = WorldGen.diseaseIds[0];
         public static string SLIMELUNG = WorldGen.diseaseIds[1];
 
-        // DEBUG
-        public static bool DEBUG_MODE = false;
-        public static bool FAST_IMMIGRATION = false;
-        public static bool TEST_NOISEMAPS = false;
-        public static bool SKIP_LIVEABLE_AREA = false;
-
         public static Dictionary<FeatureType, string> GeyserDictionary = new Dictionary<FeatureType, string>()
         {
             { FeatureType.WarmWater, "GeyserGeneric_" + GeyserGenericConfig.HotWater },

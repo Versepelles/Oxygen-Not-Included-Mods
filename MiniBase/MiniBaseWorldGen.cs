@@ -239,7 +239,7 @@ namespace MiniBase
             coreCells = new HashSet<Vector2I>();
             for (int index = 0; index < data.terrainCells.Count; ++index)
                 data.terrainCells[index].InitializeCells();
-            if(SKIP_LIVEABLE_AREA)
+            if(MiniBaseOptions.Instance.SkipLiveableArea)
                 return biomeCells;
 
             // Using a smooth noisemap, map the noise values to elements via the element band profile

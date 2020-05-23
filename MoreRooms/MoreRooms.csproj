@@ -70,9 +70,26 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuildingPatches\ArtisanPatches.cs" />
+    <Compile Include="BuildingPatches\GameRoomPatches.cs" />
+    <Compile Include="BuildingPatches\GymPatches.cs" />
+    <Compile Include="BuildingPatches\KitchenPatches.cs" />
+    <Compile Include="BuildingPatches\GalleryMuseumPatches.cs" />
+    <Compile Include="BuildingPatches\LaboratoryPatches.cs" />
+    <Compile Include="BuildingPatches\MemorialPatches.cs" />
+    <Compile Include="BuildingPatches\NurseryPatches.cs" />
+    <Compile Include="BuildingPatches\ObservatoryPatches.cs" />
+    <Compile Include="BuildingPatches\ParlourPatches.cs" />
+    <Compile Include="BuildingPatches\PetroPlantPatches.cs" />
+    <Compile Include="BuildingPatches\PrivateQuartersPatches.cs" />
+    <Compile Include="BuildingPatches\ShroomFarmPatches.cs" />
+    <Compile Include="BuildingPatches\SpaPatches.cs" />
+    <Compile Include="BuildingPatches\WinterPatches.cs" />
+    <Compile Include="MoreRoomEffects.cs" />
+    <Compile Include="MoreRoomStrings.cs" />
     <Compile Include="MoreRoomTypeCategories.cs" />
     <Compile Include="MoreRoomConstraints.cs" />
-    <Compile Include="MoreRoomsPatches.cs" />
+    <Compile Include="MoreRoomPatches.cs" />
     <Compile Include="MoreRoomTypes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

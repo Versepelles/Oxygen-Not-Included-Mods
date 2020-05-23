@@ -64,12 +64,12 @@ namespace MiniBase
         }
 
         // Reload mod options when game is reloaded from save
-        [HarmonyPatch(typeof(Game), "OnSpawn")]
-        public static class Game_OnLoadLevel_Patch
+        [HarmonyPatch(typeof(Game), "OnPrefabInit")]
+        public static class Game_OnPrefabInit_Patch
         {
             private static void Prefix()
             {
-                Log("Game_OnSpawn_Patch Prefix");
+                Log("Game_OnPrefabInit_Patch Prefix");
                 MiniBaseOptions.Reload();
             }
         }
@@ -113,36 +113,19 @@ namespace MiniBase
 
         #region CarePackages
 
-        // Immigration speed
-        [HarmonyPatch(typeof(Immigration), "OnPrefabInit")]
-        public static class Immigration_OnPrefabInit_Patch
+        // Immigration Speed
+        [HarmonyPatch(typeof(Game), "OnSpawn")]
+        public static class Game_OnSpawn_Patch
         {
-            private static void Prefix(Immigration __instance)
+            private static void Postfix()
             {
-                if (MiniBaseOptions.Instance.FastImmigration)
+                Log("Game_OnSpawn_Patch Postfix");
+                if (IsMiniBase())
                 {
-                    __instance.spawnInterval = new float[] { 10f, 5f };
-                    return;
-                }
-                if (!IsMiniBase())
-                    return;
-                Log("Immigration_OnPrefabInit_Patch Prefix");
-                float frequency = MiniBaseOptions.Instance.CarePackageFrequency * 600f;
-                __instance.spawnInterval = new float[] { frequency, frequency };
-            }
-        }
-        
-        // Immigration speed
-        [HarmonyPatch(typeof(Immigration), "OnSpawn")]
-        public static class Immigration_OnSpawn_Patch
-        {
-            private static void Postfix(Immigration __instance)
-            {
-                if (__instance.GetType() == typeof(Immigration) && IsMiniBase())
-                {
-                    Log("Immigration_OnSpawn_Patch Postfix");
+                    var immigration = Immigration.Instance;
                     float frequency = MiniBaseOptions.Instance.CarePackageFrequency * 600f;
-                    __instance.timeBeforeSpawn = Math.Min(frequency, __instance.timeBeforeSpawn);
+                    immigration.spawnInterval = new float[] { frequency, frequency };
+                    Immigration.Instance.timeBeforeSpawn = Math.Min(frequency, immigration.timeBeforeSpawn);
                 }
             }
         }
@@ -280,7 +263,6 @@ namespace MiniBase
 
             private static int GetRandomPackageCount()
             {
-                Log("Care packages IsMiniBase: " + IsMiniBase());
                 if(IsMiniBase())
                     return 3;
                 return UnityEngine.Random.Range(0, 101) > 70 ? 2 : 1;
@@ -288,7 +270,6 @@ namespace MiniBase
 
             private static int GetRandomDuplicantCount(CharacterSelectionController instance)
             {
-                Log("Duplicant packages IsMiniBase: " + IsMiniBase());
                 if (IsMiniBase())
                     return 1;
                 return 4 - ((int) TargetPackageOptions.GetValue(instance));

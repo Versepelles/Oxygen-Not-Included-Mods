@@ -377,7 +377,7 @@ namespace MiniBase
                 }
 
             // Space access
-            if(MiniBaseOptions.Instance.SpaceAccess)
+            if(MiniBaseOptions.Instance.SpaceAccess == MiniBaseOptions.AccessType.Classic)
             {
                 borderMat = WorldGen.katairiteElement;
                 for(int y = Top(); y < Top(true); y++)
@@ -387,6 +387,13 @@ namespace MiniBase
                     for (int x = Math.Max(Right() - CORNER_SIZE - SPACE_ACCESS_SIZE, Left() + CORNER_SIZE); x < Right() - CORNER_SIZE; x++)
                         AddBorderCell(x, y, borderMat);
                 }
+            }
+            else if (MiniBaseOptions.Instance.SpaceAccess == MiniBaseOptions.AccessType.Full)
+            {
+                borderMat = WorldGen.katairiteElement;
+                for (int y = Top(); y < Top(true); y++)
+                    for (int x = Left() + CORNER_SIZE; x < Right() - CORNER_SIZE; x++)
+                        AddBorderCell(x, y, borderMat);
             }
 
             return borderCells;

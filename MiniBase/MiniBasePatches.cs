@@ -164,8 +164,8 @@ namespace MiniBase
                 AddElement(SimHashes.CrudeOil, 1000f, 24);
                 AddElement(SimHashes.Petroleum, 1000f, 48);
                 // Gases
-                AddElement(SimHashes.ChlorineGas, 1000f);
-                AddElement(SimHashes.Methane, 1000f, 24);
+                AddElement(SimHashes.ChlorineGas, 50f);
+                AddElement(SimHashes.Methane, 50f, 24);
                 // Plants
                 AddItem("BasicSingleHarvestPlantSeed", 4f);             // Mealwood
                 AddItem("SeaLettuceSeed", 3f);                          // Waterweed

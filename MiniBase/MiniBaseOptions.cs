@@ -45,7 +45,7 @@ namespace MiniBase
 
         [Option("Space Access", "Allows renewable resources to be collected from meteorites\nDoes not significantly increase the liveable area", WorldGenCategory)]
         [JsonProperty]
-        public bool SpaceAccess { get; set; }
+        public AccessType SpaceAccess { get; set; }
 
         [Option("Map Size", "The size of the liveable area\nSelect 'Custom' to define a custom size", SizeCategory)]
         [JsonProperty]
@@ -90,7 +90,7 @@ namespace MiniBase
             CoreBiome = CoreType.Magma;
             SideBiome = SideType.Space;
             ResourceMod = ResourceModifier.Normal;
-            SpaceAccess = true;
+            SpaceAccess = AccessType.Classic;
             Size = BaseSize.Normal;
             CustomWidth = 70;
             CustomHeight = 40;
@@ -307,6 +307,16 @@ namespace MiniBase
             Normal,
             [Option("Rich", "50% more resources")]
             Rich,
+        }
+
+        public enum AccessType
+        {
+            [Option("None", "Fully contained and protected")]
+            None,
+            [Option("Classic", "Limited space access ports")]
+            Classic,
+            [Option("Full", "Space access across the top border")]
+            Full,
         }
 
         public enum SideType

@@ -109,17 +109,17 @@ namespace MoreRooms
             }
         }
 
-        /*// TODO: Direct Room Overlay Legend to take priority of scrolling over zooming
+        // TODO: Direct Room Overlay Legend to take priority of scrolling over zooming
         [HarmonyPatch(typeof(OverlayMenu), "OnActivate")]
         public static class OverlayMenu_OnActivate_Patch
         {
-            private static void Postfix(OverlayMenu __instance, ref bool ___ConsumeMouseScroll)
+            private static void Postfix(OverlayMenu __instance)
             {
                 Log("OverlayLegend_PopulateGeneratedLegend_Patch Postfix");
-                ___ConsumeMouseScroll = true;
+                __instance.ConsumeMouseScroll = true;
                 // TODO: remove zooming
             }
-        }*/
+        }
         #endregion
 
         // Add effects

@@ -47,5 +47,7 @@ namespace SharlesPlants
 		public void OnSpawn(GameObject inst)
 		{
 		}
+
+		public string GetDlcId() { return ""; }
 	}
 }

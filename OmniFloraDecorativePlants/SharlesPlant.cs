@@ -47,6 +47,7 @@ namespace SharlesPlants
         public Notification CreateDeathNotification()
         {
             return new Notification(CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION, NotificationType.Bad, HashedString.Invalid, 
+
                 (notificationList, data) => CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), "/t• " + gameObject.GetProperName());
         }
 

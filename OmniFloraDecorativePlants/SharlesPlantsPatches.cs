@@ -66,7 +66,7 @@ namespace SharlesPlants
 				Log("MinionSelectScreen_OnProceed_Patch Postfix");
 				if (DebugMode)
 				{
-					float radius = Math.Max(Grid.WidthInCells, Grid.HeightInCells) * 1.5f;
+					int radius = (int) (Math.Max(Grid.WidthInCells, Grid.HeightInCells) * 1.5f);
 					GridVisibility.Reveal(0, 0, radius, radius - 1);
 				}
 			}

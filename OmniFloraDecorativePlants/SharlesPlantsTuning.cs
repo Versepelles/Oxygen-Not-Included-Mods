@@ -6,7 +6,7 @@ namespace SharlesPlants
     public class SharlesPlantsTuning
     {
         public static bool DebugMode = false;
-        public static string Version = "1.0.1";
+        public static string Version = "1.0.2";
 
         public static EffectorValues WiltDecor = TUNING.DECOR.PENALTY.TIER3;
         public static EffectorValues LowDecor = new EffectorValues() { amount = 10, radius = 3 };

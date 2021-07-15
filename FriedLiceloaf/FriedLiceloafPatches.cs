@@ -22,12 +22,12 @@
 	SOFTWARE.
  */
 
-using Harmony;
+using HarmonyLib;
 using STRINGS;
 
 namespace FriedLiceloaf
 {
-    public class FriedLiceloafPatches
+    public class FriedLiceloafPatches : KMod.UserMod2
     {
         [HarmonyPatch(typeof(EntityConfigManager), "LoadGeneratedEntities")]
         public class EntityConfigManager_LoadGeneratedEntities_Patch

@@ -37,6 +37,11 @@ namespace FriedLiceloaf
 
 		public ComplexRecipe Recipe;
 
+		public string[] GetDlcIds()
+		{
+			return DlcManager.AVAILABLE_ALL_VERSIONS;
+		}
+
 		public GameObject CreatePrefab()
 		{
 			var entity = EntityTemplates.CreateLooseEntity(
@@ -55,6 +60,7 @@ namespace FriedLiceloaf
 
 			var foodInfo = new EdiblesManager.FoodInfo(
 				id: Id,
+				dlcId: "",
 				caloriesPerUnit: 2200000f,
 				quality: TUNING.FOOD.FOOD_QUALITY_MEDIOCRE,
 				preserveTemperatue: 255.15f,
@@ -85,6 +91,11 @@ namespace FriedLiceloaf
 
 		public void OnSpawn(GameObject inst)
 		{
+		}
+
+		public string GetDlcId()
+		{
+			return "";
 		}
 	}
 }

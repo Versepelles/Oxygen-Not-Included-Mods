@@ -22,17 +22,25 @@
 	SOFTWARE.
  */
 
+
+/* TODO: 
+ * Rework onLoad (currently nonfunctional)
+ * Rework elements (chlorine/hydrogen burn dupes?)
+ * Add new elements (radioactive?)
+ * Add frequency option config
+ */
+
 using System;
 using System.Collections.Generic;
-using Harmony;
+using HarmonyLib;
 using Klei.AI;
 using UnityEngine;
 using static RainbowFarts.RainbowFartsTuning;
 
 namespace RainbowFarts
 {
-    public class RainbowFartsPatches
-    {
+    public class RainbowFartsPatches : KMod.UserMod2
+	{
 		public static bool DebugMode = false;
 
 		public static class Mod_OnLoad
@@ -80,14 +88,13 @@ namespace RainbowFarts
 			}
 		}
 
-		// Trim minion selection panels and change Flatulence trait color
+		// Change Flatulence trait color
 		[HarmonyPatch(typeof(CharacterContainer), "SetInfoText")]
 		public class CharacterContainer_SetInfoText_Patch
 		{
 			public static void Postfix(ref LocText ___description, ref List<GameObject> ___traitEntries)
 			{
 				Log("CharacterContainer_SetInfoText_Patch Postfix");
-				___description.text = ""; // Remove minion flavor text for spacing reasons
 				foreach (var go in ___traitEntries)
 				{
 					var locText = go.GetComponent<LocText>();

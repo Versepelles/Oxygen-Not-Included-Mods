@@ -17,6 +17,10 @@ namespace SharlesPlants
 
 		public static PlantTuning tuning = PricklyLotusTuning;
 
+		public string[] GetDlcIds()
+		{
+			return SupportedVersions;
+		}
 
 		public GameObject CreatePrefab()
 		{
@@ -36,7 +40,5 @@ namespace SharlesPlants
 		public void OnSpawn(GameObject inst)
 		{
 		}
-
-		public string GetDlcId() { return ""; }
 	}
 }

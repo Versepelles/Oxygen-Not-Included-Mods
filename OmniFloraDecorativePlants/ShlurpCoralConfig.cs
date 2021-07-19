@@ -18,6 +18,11 @@ namespace SharlesPlants
 
 		public static PlantTuning tuning = ShlurpCoralTuning;
 
+		public string[] GetDlcIds()
+		{
+			return SupportedVersions;
+		}
+
 		public GameObject CreatePrefab()
 		{
 			var plantEntityTemplate = BaseSharlesPlantConfig.BaseSharlesPlant<WaterPlant>(Id, Name, Description, SeedId, SeedName, SeedDescription, tuning, false);
@@ -47,7 +52,5 @@ namespace SharlesPlants
 		public void OnSpawn(GameObject inst)
 		{
 		}
-
-		public string GetDlcId() { return ""; }
 	}
 }

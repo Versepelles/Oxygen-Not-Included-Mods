@@ -44,7 +44,9 @@ namespace SharlesPlants
 				safe_elements: tuning.safeElements,
 				pressure_sensitive: false,
 				can_drown: canDrown,
-				can_tinker: false);
+				can_tinker: false,
+				baseTraitId: id + "Original",
+				baseTraitName: name);
 
 			var seed = EntityTemplates.CreateAndRegisterSeedForPlant(
 				plant: plantEntityTemplate,

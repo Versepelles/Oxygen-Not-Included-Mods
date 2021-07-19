@@ -26,37 +26,40 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Harmony;
+using HarmonyLib;
+using Klei;
 using ProcGen;
-using ProcGenGame;
 using STRINGS;
 using static SharlesPlants.SharlesPlantsTuning;
 
 namespace SharlesPlants
 {
 	class SharlesPlantsPatches
-    {
+	{
 		public static Dictionary<string, PlantTuning> PlantDictionary;
 
-		public static class Mod_OnLoad
+		public class Mod_OnLoad : KMod.UserMod2
 		{
-			public static void OnLoad()
+			public override void OnLoad(Harmony harmony)
 			{
-				Log("Loading plants");
+				Log("Loading plants", true);
+
 				PlantDictionary = new Dictionary<string, PlantTuning>()
 				{
 					{ PricklyLotusConfig.Id, PricklyLotusTuning },
 					{ FrostBlossomConfig.Id, FrostBlossomTuning },
-					{ IcyShroomConfig.Id, FrostBlossomTuning },
+					{ IcyShroomConfig.Id, IcyShroomTuning },
 					{ MyrthRoseConfig.Id, MyrthRoseTuning },
 					{ RustFernConfig.Id, RustFernTuning },
 					{ SporeLampConfig.Id, SporeLampTuning },
 					{ TropicalgaeConfig.Id, TropicalgaeTuning },
 					{ ShlurpCoralConfig.Id, ShlurpCoralTuning },
 				};
+
+				base.OnLoad(harmony);
 			}
 		}
-		
+
 		// Reveal map on startup (Debug only)
 		[HarmonyPatch(typeof(MinionSelectScreen), "OnProceed")]
 		public static class MinionSelectScreen_OnProceed_Patch
@@ -80,7 +83,8 @@ namespace SharlesPlants
 			{
 				Log("EntityTemplates_ExtendEntityToBasicPlant_Patch Postfix");
 				var drowningMonitor = __result.GetComponent<DrowningMonitor>();
-				drowningMonitor.enabled = false;
+				if(drowningMonitor != null)
+					drowningMonitor.enabled = false;
 			}
 		}
 
@@ -111,34 +115,48 @@ namespace SharlesPlants
 			}
 		}
 
-		// Add plants to be spawned
-		[HarmonyPatch(typeof(WorldGen), "SpawnMobsAndTemplates")]
-		public static class WorldGen_SpawnMobsAndTemplates_Patch
+		// Add plants to Mob Dictionary
+		[HarmonyPatch(typeof(SettingsCache), "LoadFiles", new Type[] {typeof(string), typeof(string), typeof(List<YamlIO.Error>)})]
+		public static class SettingsCache_LoadFiles_Patch
 		{
-			public static void Prefix(WorldGen __instance)
+			public static void Postfix()
 			{
-				Log("WorldGen_SpawnMobsAndTemplates_Patch Prefix");
+				Log("SettingsCache_LoadFiles_Patch Postfix");
 
-				// Update mob dictionary with new plants
-				MobSettings mobSettings = Traverse.Create(__instance.Settings).Field("mutatedWorldData").GetValue<MutatedWorldData>().mobs;
-				ComposableDictionary<string, Mob> mobs = mobSettings.MobLookupTable;
+				var mobs = SettingsCache.mobs.MobLookupTable;
 
 				foreach (string plantName in PlantDictionary.Keys)
 				{
+					if (mobs.ContainsKey(plantName))
+						continue;
 					var tuning = PlantDictionary[plantName];
-					var plant = new Mob(tuning.spawnLocation) { name = plantName };
+					Mob plant = new Mob(tuning.spawnLocation) { name = plantName };
 					var p = Traverse.Create(plant);
 					p.Property("width").SetValue(1);
 					p.Property("height").SetValue(1);
 					p.Property("density").SetValue(tuning.density);
 					mobs.Add(plantName, plant);
 				}
+			}
+		}
 
-				// Update terrain cells with new plants
-				foreach (TerrainCell tcell in __instance.TerrainCells)
-					foreach (string plantName in PlantDictionary.Keys)
-						if (PlantDictionary[plantName].biomes.Contains(tcell.node.type))
-							tcell.node.biomeSpecificTags.Add(new Tag(plantName));
+		// Add plants to Biome presets
+		[HarmonyPatch(typeof(SettingsCache), "LoadSubworlds")]
+		public static class SettingsCache_LoadSubworlds_Patch
+		{
+			public static void Postfix()
+			{
+				Log("SettingsCache_LoadSubworlds_Patch Postfix");
+
+				foreach (var subworld in SettingsCache.subworlds.Values)
+					foreach (var biome in subworld.biomes)
+						foreach (string plantName in PlantDictionary.Keys)
+							if (PlantDictionary[plantName].ValidBiome(subworld, biome.name)) 
+							{
+								if (biome.tags == null)
+									Traverse.Create(biome).Property("tags").SetValue(new List<string>());
+								biome.tags.Add(plantName);
+							}
 			}
 		}
 
@@ -173,6 +191,8 @@ namespace SharlesPlants
 		{
 			public static void Postfix()
 			{
+				Log("SupermaterialRefineryConfig_ConfigureBuildingTemplate_Patch Postfix");
+
 				RegisterSeedRecipe(PricklyLotusConfig.SeedId, "CactusPlantSeed", SimHashes.Sand, 470);
 				RegisterSeedRecipe(FrostBlossomConfig.SeedId, "ColdWheatSeed", SimHashes.Tungsten, 471);
 				RegisterSeedRecipe(IcyShroomConfig.SeedId, "MushroomSeed", SimHashes.Wolframite, 472);
@@ -219,9 +239,9 @@ namespace SharlesPlants
 			};
 		}
 
-		public static void Log(string msg)
+		public static void Log(string msg, bool force = false)
 		{
-			if (DebugMode)
+			if (DebugMode || force)
 				Console.WriteLine($"<<Sharles Plants>> {msg}");
 		}
 	}

@@ -1,12 +1,40 @@
 ﻿using ProcGen;
 using System.Collections.Generic;
+using System.Linq;
+using Temperatures =  ProcGen.Temperature.Range;
+using static SharlesPlants.SharlesPlantsPatches;
 
 namespace SharlesPlants
 {
     public class SharlesPlantsTuning
     {
         public static bool DebugMode = false;
-        public static string Version = "1.0.2";
+        public static string[] SupportedVersions = DlcManager.AVAILABLE_ALL_VERSIONS;
+
+        public class BIOME_STRINGS
+        {
+            public static string PREFIX = "biomes" + "/"; // System.IO.Path.DirectorySeparatorChar; // KLEI delimiter char? might be OS dependent
+            public static string BARREN = "Barren",
+                DEFAULT = PREFIX + "Default",
+                FOREST = PREFIX + "Forest",
+                FROZEN = PREFIX + "Frozen",
+                MARSH = PREFIX + "HotMarsh",
+                JUNGLE = PREFIX + "Jungle",
+                MAGMA = PREFIX + "Magma",
+                MISC = PREFIX + "Misc",
+                EMPTY = PREFIX + "Misc/Empty",
+                OCEAN = PREFIX + "Ocean",
+                OIL = PREFIX + "Oil",
+                RUST = PREFIX + "Rust",
+                SEDIMENTARY = PREFIX + "Sedimentary",
+                AQUATIC = PREFIX + "Aquatic",
+                METALLIC = PREFIX + "Metallic",
+                MOO = PREFIX + "Moo",
+                NIOBIUM = PREFIX + "Niobium",
+                RADIOACTIVE = PREFIX + "Radioactive",
+                SWAMP = PREFIX + "Swamp",
+                WASTELAND = PREFIX + "Wasteland";
+        }
 
         public static EffectorValues WiltDecor = TUNING.DECOR.PENALTY.TIER3;
         public static EffectorValues LowDecor = new EffectorValues() { amount = 10, radius = 3 };
@@ -37,16 +65,21 @@ namespace SharlesPlants
                 SimHashes.Hydrogen,
                 SimHashes.ChlorineGas,
             },
+            biomeTemperatures = new HashSet<Temperatures>()
+            {
+                Temperatures.Mild,
+                Temperatures.Room,
+                Temperatures.HumanWarm,
+                Temperatures.HumanHot,
+                Temperatures.Hot,
+            },
             biomes = new HashSet<string>()
             {
-                "biomes/Sedimentary/Desert",
-                "biomes/Jungle/Basic",
-                "biomes/Jungle/Toxic",
-                "biomes/Jungle/Solid",
-                "biomes/Oil/OilPockets",
-                "biomes/Oil/OilField",
-                "biomes/Oil/OilPatch",
-                "biomes/Oil/OilDry",
+                BIOME_STRINGS.JUNGLE,
+                BIOME_STRINGS.OIL,
+                BIOME_STRINGS.MOO,
+                BIOME_STRINGS.WASTELAND,
+                "Desert",
             },
             spawnLocation = Mob.Location.Floor,
         };
@@ -54,7 +87,7 @@ namespace SharlesPlants
         // Frost Blossom tuning
         public static PlantTuning FrostBlossomTuning = new PlantTuning
         {
-            density = new MinMax(0.1f, 0.18f),
+            density = new MinMax(0.15f, 0.25f),
             lethalLow = 183.15f,            // -90C
             warningLow = 213.15f,           // -60C
             transitionLow = 253.15f,        // -20C
@@ -69,12 +102,19 @@ namespace SharlesPlants
             {
                 SimHashes.Oxygen,
                 SimHashes.CarbonDioxide,
+                SimHashes.Vacuum,
+            },
+            biomeTemperatures = new HashSet<Temperatures>()
+            {
+                Temperatures.VeryCold,
+                Temperatures.Cold,
+                Temperatures.Chilly,
+                Temperatures.Cool,
             },
             biomes = new HashSet<string>()
             {
-                "biomes/Frozen/Wet",
-                "biomes/Frozen/Dry",
-                "biomes/Frozen/Solid",
+                BIOME_STRINGS.FROZEN,
+                BIOME_STRINGS.RADIOACTIVE,
             },
             spawnLocation = Mob.Location.Floor,
         };
@@ -82,7 +122,7 @@ namespace SharlesPlants
         // Icy Shroom tuning
         public static PlantTuning IcyShroomTuning = new PlantTuning
         {
-            density = new MinMax(0.1f, 0.18f),
+            density = new MinMax(0.12f, 0.20f),
             lethalLow = 193.15f,            // -80C
             warningLow = 233.15f,           // -40C
             transitionLow = 268.15f,        //  -5C
@@ -96,13 +136,25 @@ namespace SharlesPlants
             safeElements = new SimHashes[]
             {
                 SimHashes.Oxygen,
+                SimHashes.ContaminatedOxygen,
                 SimHashes.CarbonDioxide,
+                SimHashes.Vacuum,
+            },
+            biomeTemperatures = new HashSet<Temperatures>()
+            {
+                Temperatures.Cold,
+                Temperatures.Chilly,
+                Temperatures.Cool,
+                Temperatures.Mild,
             },
             biomes = new HashSet<string>()
             {
-                "biomes/Frozen/Wet",
-                "biomes/Frozen/Dry",
-                "biomes/Frozen/Solid",
+                BIOME_STRINGS.SEDIMENTARY,
+                BIOME_STRINGS.FOREST,
+                BIOME_STRINGS.FROZEN,
+                BIOME_STRINGS.MARSH,
+                BIOME_STRINGS.OCEAN,
+                BIOME_STRINGS.SWAMP,
             },
             spawnLocation = Mob.Location.Floor,
         };
@@ -129,22 +181,20 @@ namespace SharlesPlants
                 SimHashes.Hydrogen,
                 SimHashes.ChlorineGas,
             },
+            biomeTemperatures = new HashSet<Temperatures>()
+            {
+                Temperatures.Room,
+                Temperatures.HumanWarm,
+                Temperatures.HumanHot,
+            },
             biomes = new HashSet<string>()
             {
-                "biomes/Sedimentary/Basic",
-                "biomes/Sedimentary/Basic_CO2",
-                "biomes/Sedimentary/Metal_CO2",
-                "biomes/Sedimentary/Lake_Oxygen",
-                "biomes/Sedimentary/Lake_CO2",
-                "biomes/Sedimentary/Desert",
-                "biomes/Forest/Basic",
-                "biomes/Forest/BasicOxy",
-                "biomes/Forest/Metal",
-                "biomes/Jungle/Basic",
-                "biomes/Jungle/Toxic",
-                "biomes/Jungle/Solid",
-                "biomes/HotMarsh/Basic",
-                "biomes/HotMarsh/Dry",
+                BIOME_STRINGS.SEDIMENTARY,
+                BIOME_STRINGS.FOREST,
+                BIOME_STRINGS.MARSH,
+                BIOME_STRINGS.JUNGLE,
+                BIOME_STRINGS.SWAMP,
+                BIOME_STRINGS.WASTELAND,
             },
             spawnLocation = Mob.Location.Floor,
         };
@@ -170,16 +220,22 @@ namespace SharlesPlants
                 SimHashes.Hydrogen,
                 SimHashes.ChlorineGas,
             },
+            biomeTemperatures = new HashSet<Temperatures>()
+            {
+                Temperatures.Cool,
+                Temperatures.Mild,
+                Temperatures.Room,
+                Temperatures.HumanWarm,
+                Temperatures.HumanHot,
+            },
             biomes = new HashSet<string>()
             {
-                "biomes/Rust/Basic",
-                "biomes/Rust/Snowy",
-                "biomes/Rust/Sulfurous",
-                "biomes/Ocean/Basic",
-                "biomes/Ocean/Dry",
-                "biomes/Ocean/Briny",
-                "biomes/Ocean/Frozen",
-                "biomes/Ocean/Deep",
+                BIOME_STRINGS.RUST,
+                BIOME_STRINGS.OCEAN,
+                BIOME_STRINGS.BARREN,
+                BIOME_STRINGS.RADIOACTIVE,
+                BIOME_STRINGS.WASTELAND,
+                "GraphiteCaves",
             },
             spawnLocation = Mob.Location.Floor,
         };
@@ -206,10 +262,19 @@ namespace SharlesPlants
                 SimHashes.Hydrogen,
                 SimHashes.EthanolGas,
             },
+            biomeTemperatures = new HashSet<Temperatures>()
+            {
+                Temperatures.Mild,
+                Temperatures.Room,
+                Temperatures.HumanWarm,
+                Temperatures.HumanHot,
+                Temperatures.Hot,
+            },
             biomes = new HashSet<string>()
             {
-                "biomes/HotMarsh/Basic",
-                "biomes/HotMarsh/Dry",
+                BIOME_STRINGS.MARSH,
+                BIOME_STRINGS.SWAMP,
+                BIOME_STRINGS.MOO,
             },
             spawnLocation = Mob.Location.Floor,
         };
@@ -233,24 +298,22 @@ namespace SharlesPlants
                 SimHashes.DirtyWater,
                 SimHashes.SaltWater,
             },
+            biomeTemperatures = new HashSet<Temperatures>()
+            {
+                Temperatures.Mild,
+                Temperatures.Room,
+                Temperatures.HumanWarm,
+                Temperatures.HumanHot,
+            },
             biomes = new HashSet<string>()
             {
-                "biomes/Sedimentary/Basic",
-                "biomes/Sedimentary/Basic_CO2",
-                "biomes/Sedimentary/Metal_CO2",
-                "biomes/Sedimentary/Lake_Oxygen",
-                "biomes/Sedimentary/Lake_CO2",
-                "biomes/Sedimentary/Desert",
-                "biomes/Forest/Basic",
-                "biomes/Forest/BasicOxy",
-                "biomes/Forest/Metal",
-                "biomes/HotMarsh/Basic",
-                "biomes/HotMarsh/Dry",
-                "biomes/Ocean/Basic",
-                "biomes/Ocean/Dry",
-                "biomes/Ocean/Briny",
-                "biomes/Ocean/Frozen",
-                "biomes/Ocean/Deep",
+                BIOME_STRINGS.SEDIMENTARY,
+                BIOME_STRINGS.FOREST,
+                BIOME_STRINGS.MARSH,
+                BIOME_STRINGS.OCEAN,
+                BIOME_STRINGS.AQUATIC,
+                BIOME_STRINGS.SWAMP,
+                BIOME_STRINGS.WASTELAND,
             },
             spawnLocation = Mob.Location.LiquidFloor,
         };
@@ -276,13 +339,17 @@ namespace SharlesPlants
                 SimHashes.DirtyWater,
                 SimHashes.SaltWater,
             },
+            biomeTemperatures = new HashSet<Temperatures>()
+            {
+                Temperatures.Mild,
+                Temperatures.Room,
+                Temperatures.HumanWarm,
+                Temperatures.HumanHot,
+            },
             biomes = new HashSet<string>()
             {
-                "biomes/Ocean/Basic",
-                "biomes/Ocean/Dry",
-                "biomes/Ocean/Briny",
-                "biomes/Ocean/Frozen",
-                "biomes/Ocean/Deep",
+                BIOME_STRINGS.OCEAN,
+                BIOME_STRINGS.AQUATIC,
             },
             spawnLocation = Mob.Location.LiquidFloor,
         };
@@ -302,8 +369,16 @@ namespace SharlesPlants
             public EffectorValues matureDecor;
             public EffectorValues flourishingDecor;
             public SimHashes[] safeElements;
+            public ISet<Temperatures> biomeTemperatures;
             public ISet<string> biomes;
+            public ISet<string> biomesExcluded;
             public Mob.Location spawnLocation;
+
+            // Check that the subworld temperature and current biome are appropriate for the plant
+            public bool ValidBiome(SubWorld subworld, string biome)
+            {
+                return biomeTemperatures.Contains(subworld.temperatureRange) && (biomesExcluded == null || !biomesExcluded.Any(b => biome.Contains(b))) && biomes.Any(b => biome.Contains(b));
+            }
         }
     }
 }

@@ -17,6 +17,11 @@ namespace SharlesPlants
 
 		public static PlantTuning tuning = FrostBlossomTuning;
 
+		public string[] GetDlcIds()
+		{
+			return SupportedVersions;
+		}
+
 		public GameObject CreatePrefab()
 		{
 			var plantEntityTemplate = BaseSharlesPlantConfig.BaseSharlesPlant<ColdLovingPlant>(Id, Name, Description, SeedId, SeedName, SeedDescription, tuning);
@@ -35,7 +40,5 @@ namespace SharlesPlants
 		public void OnSpawn(GameObject inst)
 		{
 		}
-
-		public string GetDlcId() { return ""; }
 	}
 }

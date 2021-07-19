@@ -46,8 +46,7 @@ namespace SharlesPlants
 
         public Notification CreateDeathNotification()
         {
-            return new Notification(CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION, NotificationType.Bad, HashedString.Invalid, 
-
+            return new Notification(CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION, NotificationType.Bad,
                 (notificationList, data) => CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), "/t• " + gameObject.GetProperName());
         }
 
@@ -74,7 +73,7 @@ namespace SharlesPlants
 
             public override void InitializeStates(out BaseState defaultState)
             {
-                serializable = true;
+                serializable = SerializeType.Both_DEPRECATED;
                 defaultState = Alive;
 
                 var plantname = CREATURES.STATUSITEMS.DEAD.NAME;

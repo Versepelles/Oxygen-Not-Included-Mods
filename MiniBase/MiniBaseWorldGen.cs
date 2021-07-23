@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Harmony;
+using HarmonyLib;
 using Klei;
 using ProcGen;
 using ProcGenGame;
@@ -18,63 +18,78 @@ namespace MiniBase
     public class MiniBaseWorldGen
     {
         private static System.Random random;
-
+        
         // Rewrite of WorldGen.RenderOffline
-        public static Sim.Cell[] CreateWorld(WorldGen worldGen, ref Sim.DiseaseCell[] dc)
+        public static bool CreateWorld(WorldGen gen, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId)
         {
+            Log("Creating world");
+
             MiniBaseOptions options = MiniBaseOptions.Instance;
             MiniBaseBiomeProfile biomeProfile = options.GetBiome();
             MiniBaseBiomeProfile coreProfile = options.GetCoreBiome();
 
             // Convenience variables, including private fields/properties
-            var instance = Traverse.Create(worldGen);
-            Data data = instance.Field("data").GetValue<Data>();
-            SeededRandom myRandom = instance.Field("myRandom").GetValue<SeededRandom>();
-            WorldGen.OfflineCallbackFunction updateProgressFn = instance.Field("successCallbackFn").GetValue<WorldGen.OfflineCallbackFunction>();
-            Action<OfflineWorldGen.ErrorInfo> errorCallback = instance.Field("errorCallback").GetValue<Action<OfflineWorldGen.ErrorInfo>>();
-            var running = instance.Field("running");
+            var worldGen = Traverse.Create(gen);
+            var data = gen.data;
+            var myRandom = worldGen.Field("myRandom").GetValue<SeededRandom>();
+            var updateProgressFn = worldGen.Field("successCallbackFn").GetValue<WorldGen.OfflineCallbackFunction>();
+            var errorCallback = worldGen.Field("errorCallback").GetValue<Action<OfflineWorldGen.ErrorInfo>>();
+            var running = worldGen.Field("running");
             running.SetValue(true);
             random = new System.Random(data.globalTerrainSeed);
 
             // Initialize noise maps
+            Log("Initializing noise maps");
             updateProgressFn(UI.WORLDGEN.GENERATENOISE.key, 0f, WorldGenProgressStages.Stages.NoiseMapBuilder);
-            float[,] noiseMap = GenerateNoiseMap(random, WORLD_WIDTH, WORLD_HEIGHT);
-            updateProgressFn(UI.WORLDGEN.GENERATENOISE.key, 100f, WorldGenProgressStages.Stages.NoiseMapBuilder);
+            var noiseMap = GenerateNoiseMap(random, WORLD_WIDTH, WORLD_HEIGHT);
+            updateProgressFn(UI.WORLDGEN.GENERATENOISE.key, 0.9f, WorldGenProgressStages.Stages.NoiseMapBuilder);
 
             // Set biomes
+            Log("Setting biomes");
             SetBiomes(data.overworldCells);
 
             // Rewrite of WorldGen.RenderToMap function, which calls the default terrain and border generation, places features, and spawns flora and fauna
-            Sim.Cell[] cells = new Sim.Cell[Grid.CellCount];
-            float[] bgTemp = new float[Grid.CellCount];
+            cells = new Sim.Cell[Grid.CellCount];
+            var bgTemp = new float[Grid.CellCount];
             dc = new Sim.DiseaseCell[Grid.CellCount];
 
             // Initialize terrain
+            Log("Clearing terrain");
             updateProgressFn(UI.WORLDGEN.CLEARINGLEVEL.key, 0f, WorldGenProgressStages.Stages.ClearingLevel);
             ClearTerrain(cells, bgTemp, dc);
-            updateProgressFn(UI.WORLDGEN.CLEARINGLEVEL.key, 100f, WorldGenProgressStages.Stages.ClearingLevel);
+            updateProgressFn(UI.WORLDGEN.CLEARINGLEVEL.key, 1f, WorldGenProgressStages.Stages.ClearingLevel);
 
             // Draw custom terrain
+            Log("Drawing terrain");
             updateProgressFn(UI.WORLDGEN.PROCESSING.key, 0f, WorldGenProgressStages.Stages.Processing);
             ISet<Vector2I> biomeCells, coreCells, borderCells;
             biomeCells = DrawCustomTerrain(data, cells, bgTemp, dc, noiseMap, out coreCells);
-            updateProgressFn(UI.WORLDGEN.PROCESSING.key, 100f, WorldGenProgressStages.Stages.Processing);
+            updateProgressFn(UI.WORLDGEN.PROCESSING.key, 0.9f, WorldGenProgressStages.Stages.Processing);
 
             // Printing pod
-            data.gameSpawnData.baseStartPos = Vec(Left() + (Width() / 2) - 1, Bottom() + (Height() / 2) + 2);
+            Log("Generating starting template");
+            var startPos = Vec(Left() + (Width() / 2) - 1, Bottom() + (Height() / 2) + 2);
+            data.gameSpawnData.baseStartPos = startPos;
             var templateSpawnTargets = new List<KeyValuePair<Vector2I, TemplateContainer>>();
-            TemplateContainer startingBaseTemplate = TemplateCache.GetStartingBaseTemplate(worldGen.Settings.world.startingBaseTemplate);
+            var reservedCells = new HashSet<Vector2I>();
+            TemplateContainer startingBaseTemplate = TemplateCache.GetTemplate(gen.Settings.world.startingBaseTemplate);
+
+            Log("Adding starting items");
             startingBaseTemplate.pickupables.Clear(); // Remove stray hatch
             var itemPos = new Vector2I(3, 1);
-            foreach (var entry in biomeProfile.startingItems)
+            foreach (var entry in biomeProfile.startingItems) // Add custom defined starting items
                 startingBaseTemplate.pickupables.Add(new Prefab(entry.Key, Prefab.Type.Pickupable, itemPos.x, itemPos.y, (SimHashes) 0, _units: entry.Value));
             foreach (Cell cell in startingBaseTemplate.cells)
+            {
                 if (cell.element == SimHashes.SandStone || cell.element == SimHashes.Algae)
                     cell.element = biomeProfile.defaultMaterial;
+                reservedCells.Add(new Vector2I(cell.location_x, cell.location_y) + startPos);
+            }
             startingBaseTemplate.cells.RemoveAll((c) => (c.location_x == -8) || (c.location_x == 9)); // Trim the starting base area
-            templateSpawnTargets.Add(new KeyValuePair<Vector2I, TemplateContainer>(data.gameSpawnData.baseStartPos, startingBaseTemplate));
+            templateSpawnTargets.Add(new KeyValuePair<Vector2I, TemplateContainer>(startPos, startingBaseTemplate));
 
             // Geysers
+            Log("Placing features");
             int GeyserMinX = Left() + CORNER_SIZE + 2;
             int GeyserMaxX = Right() - CORNER_SIZE - 4;
             int GeyserMinY = Bottom() + CORNER_SIZE + 2;
@@ -93,34 +108,39 @@ namespace MiniBase
                 prefab.GetComponent<PrimaryElement>().SetElement(SimHashes.Katairite);
 
             // Draw borders
+            Log("Drawing borders");
             updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, 0f, WorldGenProgressStages.Stages.DrawWorldBorder);
             borderCells = DrawCustomWorldBorders(cells);
             biomeCells.ExceptWith(borderCells);
             coreCells.ExceptWith(borderCells);
-            updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, 100f, WorldGenProgressStages.Stages.DrawWorldBorder);
+            updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, 1f, WorldGenProgressStages.Stages.DrawWorldBorder);
 
             // Settle simulation
             // This writes the cells to the world, then performs a couple of game frames of simulation, then saves the game
-            void onSettleComplete(Sim.Cell[] cs, float[] bgs, Sim.DiseaseCell[] dcs) { } // This is when flora and fauna are added in the default game (SpawnMobsAndTemplates)
-            running.SetValue(WorldGenSimUtil.DoSettleSim(worldGen.Settings, cells, bgTemp, dc, updateProgressFn, data, templateSpawnTargets, errorCallback, onSettleComplete));
-
-            // Add plants, critters, and items
-            updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 0f, WorldGenProgressStages.Stages.PlacingCreatures);
-            PlaceSpawnables(cells, data.gameSpawnData.pickupables, biomeProfile, biomeCells);
-            updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 50f, WorldGenProgressStages.Stages.PlacingCreatures);
-            if (options.HasCore())
-                PlaceSpawnables(cells, data.gameSpawnData.pickupables, coreProfile, coreCells);
-            updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 100f, WorldGenProgressStages.Stages.PlacingCreatures);
+            Log("Settling sim");
+            running.SetValue(WorldGenSimUtil.DoSettleSim(gen.Settings, ref cells, ref bgTemp, ref dc, updateProgressFn, data, templateSpawnTargets, errorCallback, baseId));
 
             // Place templates, pretty much just the printing pod
+            Log("Placing templates");
+            var claimedCells = new Dictionary<int, int>();
             foreach (KeyValuePair<Vector2I, TemplateContainer> keyValuePair in templateSpawnTargets)
-                instance.Method("PlaceTemplateSpawners", new Type[] { typeof(Vector2I), typeof(TemplateContainer) }).GetValue(keyValuePair.Key, keyValuePair.Value);
+                data.gameSpawnData.AddTemplate(keyValuePair.Value, keyValuePair.Key, ref claimedCells);
+
+            // Add plants, critters, and items
+            Log("Adding critters, etc");
+            updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 0f, WorldGenProgressStages.Stages.PlacingCreatures);
+            PlaceSpawnables(cells, data.gameSpawnData.pickupables, biomeProfile, biomeCells, reservedCells);
+            updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 50f, WorldGenProgressStages.Stages.PlacingCreatures);
+            if (options.HasCore())
+                PlaceSpawnables(cells, data.gameSpawnData.pickupables, coreProfile, coreCells, reservedCells);
+            updateProgressFn(UI.WORLDGEN.PLACINGCREATURES.key, 100f, WorldGenProgressStages.Stages.PlacingCreatures);
 
             // Finish and save
-            worldGen.SaveWorldGen();
-            updateProgressFn(UI.WORLDGEN.COMPLETE.key, 101f, WorldGenProgressStages.Stages.Complete);
+            Log("Saving world");
+            gen.SaveWorldGen();
+            updateProgressFn(UI.WORLDGEN.COMPLETE.key, 1f, WorldGenProgressStages.Stages.Complete);
             running.SetValue(false);
-            return cells;
+            return true;
         }
 
         // Set biome background for all cells
@@ -140,14 +160,15 @@ namespace MiniBase
             uint cellId = 0;
             void CreateOverworldCell(string type, Polygon bs, TagSet ts)
             {
-                ProcGen.Node node = new ProcGen.Node(type); // biome
+                ProcGen.Map.Cell cell = new ProcGen.Map.Cell(); // biome
+                cell.SetType(type);
                 foreach (Tag tag in ts)
-                    node.tags.Add(tag);
+                    cell.tags.Add(tag);
                 Diagram.Site site = new Diagram.Site();
                 site.id = cellId++;
                 site.poly = bs; // bounds of the overworld cell
                 site.position = site.poly.Centroid();
-                overworldCells.Add(new TerrainCellLogged(node, site));
+                overworldCells.Add(new TerrainCellLogged(cell, site, new Dictionary<Tag, int>()));
             };
 
             // Vertices of the liveable area (octogon)
@@ -236,15 +257,24 @@ namespace MiniBase
             var options = MiniBaseOptions.Instance;
             var biomeCells = new HashSet<Vector2I>();
             var sideCells = new HashSet<Vector2I>();
+            var claimedCells = new HashSet<int>();
             coreCells = new HashSet<Vector2I>();
             for (int index = 0; index < data.terrainCells.Count; ++index)
-                data.terrainCells[index].InitializeCells();
+                data.terrainCells[index].InitializeCells(claimedCells);
             if(MiniBaseOptions.Instance.SkipLiveableArea)
                 return biomeCells;
 
             // Using a smooth noisemap, map the noise values to elements via the element band profile
             void SetTerrain(MiniBaseBiomeProfile biome, ISet<Vector2I> positions)
             {
+                var DiseaseDb = Db.Get().Diseases;
+                var DiseaseDict = new Dictionary<DiseaseID, byte>()
+                {
+                    { DiseaseID.NONE, byte.MaxValue},
+                    { DiseaseID.SLIMELUNG, DiseaseDb.GetIndex(DiseaseDb.SlimeGerms.id)},
+                    { DiseaseID.FOOD_POISONING, DiseaseDb.GetIndex(DiseaseDb.FoodGerms.id)},
+                };
+
                 foreach(var pos in positions)
                 {
                     float e = noiseMap[pos.x, pos.y];
@@ -253,12 +283,11 @@ namespace MiniBase
                     Sim.PhysicsData elementData = biome.GetPhysicsData(bandInfo);
                     int cell = Grid.PosToCell(pos);
                     cells[cell].SetValues(element, elementData, ElementLoader.elements);
-                    if (bandInfo.disease != null)
-                        dc[cell] = new Sim.DiseaseCell()
-                        {
-                            diseaseIdx = (byte) WorldGen.diseaseIds.FindIndex(d => d == bandInfo.disease),
-                            elementCount = random.Next(10000, 1000000),
-                        };
+                    dc[cell] = new Sim.DiseaseCell()
+                    {
+                        diseaseIdx = Db.Get().Diseases.GetIndex(DiseaseDict[bandInfo.disease]),
+                        elementCount = random.Next(10000, 1000000),
+                    };
                 }
             }
 
@@ -443,7 +472,7 @@ namespace MiniBase
                         cells[Grid.XYToCell(x, y)].SetValues(coverMaterial, GetPhysicsData(coverMaterial), ElementLoader.elements);
         }
 
-        private static SpawnPoints GetSpawnPoints(Sim.Cell[] cells, ISet<Vector2I> biomeCells)
+        private static SpawnPoints GetSpawnPoints(Sim.Cell[] cells, IEnumerable<Vector2I> biomeCells)
         {
             var spawnPoints = new SpawnPoints()
             {
@@ -484,9 +513,9 @@ namespace MiniBase
             public ISet<Vector2I> inLiquid;
         }
 
-        private static void PlaceSpawnables(Sim.Cell[] cells, List<Prefab> spawnList, MiniBaseBiomeProfile biome, ISet<Vector2I> biomeCells)
+        private static void PlaceSpawnables(Sim.Cell[] cells, List<Prefab> spawnList, MiniBaseBiomeProfile biome, ISet<Vector2I> biomeCells, ISet<Vector2I> reservedCells)
         {
-            var spawnStruct = GetSpawnPoints(cells, biomeCells);
+            var spawnStruct = GetSpawnPoints(cells, biomeCells.Except(reservedCells));
             PlaceSpawnables(spawnList, biome.spawnablesOnFloor, spawnStruct.onFloor, Prefab.Type.Pickupable);
             PlaceSpawnables(spawnList, biome.spawnablesOnCeil, spawnStruct.onCeil, Prefab.Type.Pickupable);
             PlaceSpawnables(spawnList, biome.spawnablesInGround, spawnStruct.inGround, Prefab.Type.Pickupable);

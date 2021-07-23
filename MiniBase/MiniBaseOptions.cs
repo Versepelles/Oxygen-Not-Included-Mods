@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using PeterHan.PLib;
 using PeterHan.PLib.Options;
 using System.Collections.Generic;
 using static MiniBase.Profiles.MiniBaseBiomeProfiles;
@@ -9,8 +8,10 @@ namespace MiniBase
 {
     [ConfigFile("config.json", true)]
     [JsonObject(MemberSerialization.OptIn)]
-    public class MiniBaseOptions : POptions.SingletonOptions<MiniBaseOptions>
+    public sealed class MiniBaseOptions
     {
+        public static MiniBaseOptions Instance { get; private set; }
+
         private const string WorldGenCategory = "These options are only applied when the map is generated";
         private const string SizeCategory = "These options change the size of the liveable area\nTo define a custom size, set Map Size to 'Custom'";
         private const string AnytimeCategory = "These options may be changed at any time";
@@ -61,10 +62,6 @@ namespace MiniBase
         [JsonProperty]
         public int CustomHeight { get; set; }
 
-        [Option("Disable Steam Turbines", "Prevents steam turbines from being built\nAlternative cooling methods will be required\n(e.g. Cool Slush or Polluted Water geyser)", AnytimeCategory)]
-        [JsonProperty]
-        public bool TurbinesDisabled { get; set; }
-
         [Option("Care Package Timer (Cycles)", "Period of care package drops, in cycles\nLower values give more frequent drops", AnytimeCategory)]
         [Limit(1, 10)]
         [JsonProperty]
@@ -94,7 +91,6 @@ namespace MiniBase
             Size = BaseSize.Normal;
             CustomWidth = 70;
             CustomHeight = 40;
-            TurbinesDisabled = false;
             CarePackageFrequency = 2;
 
             DebugMode = false;
@@ -104,7 +100,7 @@ namespace MiniBase
 
         public static void Reload()
         {
-            Instance = POptions.ReadSettings<MiniBaseOptions>();
+            Instance = POptions.ReadSettings<MiniBaseOptions>() ?? new MiniBaseOptions();
         }
 
         public Vector2I GetBaseSize()

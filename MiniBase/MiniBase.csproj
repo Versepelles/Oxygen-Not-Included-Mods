@@ -10,11 +10,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MiniBase</RootNamespace>
     <AssemblyName>MiniBase</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,6 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -47,8 +50,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="PLibOptions">
-      <HintPath>PLib\PLibOptions.dll</HintPath>
+    <Reference Include="PLib">
+      <HintPath>PLib\PLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -90,10 +93,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"$(ILMergeConsolePath)" /lib:"$(SolutionDir)/PLib/" /out:$(TargetName)-merged.dll $(TargetName).dll PLibOptions.dll /targetplatform:v4,C:/Windows/Microsoft.NET/Framework64/v4.0.30319
+    <PostBuildEvent>"$(ILMergeConsolePath)" /lib:"$(SolutionDir)/PLib/" /out:$(TargetName)-merged.dll $(TargetName).dll PLib.dll /targetplatform:v4,C:/Windows/Microsoft.NET/Framework64/v4.0.30319
 mkdir "%25HOMEPATH%25\Documents\Klei\OxygenNotIncluded\mods\dev\$(ProjectName)"
 copy "$(TargetName)-merged.dll" "%25HOMEPATH%25\Documents\Klei\OxygenNotIncluded\mods\dev\$(ProjectName)\$(ProjectName)-merged.dll"
-copy "mod_info.yaml" "%25HOMEPATH%25\Documents\Klei\OxygenNotIncluded\mods\dev\$(ProjectName)\mod_info.yaml"</PostBuildEvent>
+</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

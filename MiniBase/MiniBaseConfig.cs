@@ -1,5 +1,4 @@
-﻿using ProcGenGame;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using static MiniBase.MiniBaseOptions;
 
 namespace MiniBase
@@ -18,8 +17,11 @@ namespace MiniBase
         public static int CORE_DEVIATION = 3;
         public static int CORE_BORDER = 3;
 
-        public static string FOOD_POISONING = WorldGen.diseaseIds[0];
-        public static string SLIMELUNG = WorldGen.diseaseIds[1];
+        public enum DiseaseID { NONE, SLIMELUNG, FOOD_POISONING };
+
+        public static string ClusterName = "MiniBase";
+        public static string ClusterDescription = "An encapsulated location with just enough to get by.\n\n<smallcaps>Customize this location by clicking MiniBase Options in the Mods menu.</smallcaps>\n\n";
+        public static string ClusterIconName = "Asteroid_minibase";
 
         public static Dictionary<FeatureType, string> GeyserDictionary = new Dictionary<FeatureType, string>()
         {

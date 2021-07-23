@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using static MiniBase.MiniBaseConfig;
 
 namespace MiniBase
 {
@@ -49,7 +50,7 @@ namespace MiniBase
                     return bandProfile[i];
             return bandProfile[bandProfile.Length - 1];
         }
-
+        
         public Sim.PhysicsData GetPhysicsData(BandInfo band, float modifier = 1f)
         {
             float temperature = (band.temperature < 0 && defaultTemperature > 0) ? defaultTemperature : band.temperature;
@@ -63,9 +64,9 @@ namespace MiniBase
         public SimHashes elementId;
         public float temperature;
         public float density;
-        public string disease;
+        public DiseaseID disease;
 
-        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f, string disease = null)
+        public BandInfo(float cumulativeWeight, SimHashes elementId, float temperature = -1f, float density = 1f, DiseaseID disease = DiseaseID.NONE)
         {
             this.cumulativeWeight = cumulativeWeight;
             this.elementId = elementId;

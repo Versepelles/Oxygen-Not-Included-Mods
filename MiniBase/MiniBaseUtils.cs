@@ -1,7 +1,6 @@
-﻿using Klei.CustomSettings;
-using System;
-using System.Diagnostics;
+﻿using System;
 using UnityEngine;
+using Klei.CustomSettings;
 using static MiniBase.MiniBaseConfig;
 
 namespace MiniBase
@@ -10,31 +9,17 @@ namespace MiniBase
     {
         public static bool IsMiniBase()
         {
-            bool b = false;
-            try
-            {
-                /*
-                if(MiniBaseOptions.Instance.DebugMode)
-                    Log($"Checking IsMiniBase from {new StackTrace().GetFrame(1).GetMethod().DeclaringType.FullName}");
-                */
-                b = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id == ("worlds/" + MiniBasePatches.Db_Initialize_Patch.Name);
-            }
-            catch
-            {
-                Log($"Checking IsMiniBase Error");
-                return false;
-            }
-            return b;
+            return CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout).id == ("clusters/" + ClusterName);
         }
 
-        public static void Log(String msg, bool force = false)
+        public static void Log(string msg, bool force = false)
         {
             if (force || MiniBaseOptions.Instance.DebugMode)
                 Console.WriteLine("<MiniBase> " + msg);
         }
 
         #region Debug
-
+        
         public static void TestNoiseMaps()
         {
             int NumTests = 20;

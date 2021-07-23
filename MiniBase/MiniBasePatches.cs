@@ -23,13 +23,10 @@
 */
  
 using System;
-using Harmony;
+using HarmonyLib;
 using ProcGen;
 using ProcGenGame;
 using PeterHan.PLib.Options;
-using System.Reflection.Emit;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Linq;
 using static MiniBase.MiniBaseConfig;
 using static MiniBase.MiniBaseUtils;
@@ -38,25 +35,25 @@ using System.IO;
 
 namespace MiniBase
 {
-    public class MiniBasePatches
+    public class MiniBasePatches : KMod.UserMod2
     {
         public static string ModPath;
 
-        public static class Mod_OnLoad
+        public override void OnLoad(Harmony harmony)
         {
-            public static void OnLoad(string modPath)
-            {
-                Log($"MiniBase loaded.", true);
-                ModPath = modPath;
-                POptions.RegisterOptions(typeof(MiniBaseOptions));
-            }
+            MiniBaseOptions.Reload();
+            new POptions().RegisterOptions(this, typeof(MiniBaseOptions));
+            ModPath = mod.ContentPath;
+            base.OnLoad(harmony);
+
+            Log($"MiniBase loaded.", true);
         }
 
         // Reload mod options at asteroid select screen, before world gen happens
         [HarmonyPatch(typeof(ColonyDestinationSelectScreen), "LaunchClicked")]
         public static class ColonyDestinationSelectScreen_LaunchClicked_Patch
         {
-            private static void Prefix()
+            public static void Prefix()
             {
                 Log("ColonyDestinationSelectScreen_LaunchClicked_Patch Prefix");
                 MiniBaseOptions.Reload();
@@ -67,7 +64,7 @@ namespace MiniBase
         [HarmonyPatch(typeof(Game), "OnPrefabInit")]
         public static class Game_OnPrefabInit_Patch
         {
-            private static void Prefix()
+            public static void Prefix()
             {
                 Log("Game_OnPrefabInit_Patch Prefix");
                 MiniBaseOptions.Reload();
@@ -78,7 +75,7 @@ namespace MiniBase
         [HarmonyPatch(typeof(MinionSelectScreen), "OnProceed")]
         public static class MinionSelectScreen_OnProceed_Patch
         {
-            private static void Postfix()
+            public static void Postfix()
             {
                 if (!IsMiniBase())
                     return;
@@ -88,53 +85,31 @@ namespace MiniBase
             }
         }
 
-        // Disable Steam Turbine
-        // TODO: convert to tech tree option
-        [HarmonyPatch(typeof(PlanScreen), "PopulateOrderInfo")]
-        public static class PlanScreen_PopulateOrderInfo_Patch
-        {
-            private static void Prefix(HashedString category, ref object data)
-            {
-                if (!IsMiniBase())
-                    return;
-                if ((category == new HashedString("Power")) && (data.GetType() != typeof(PlanScreen.PlanInfo)))
-                {
-                    Log("PlanScreen_PopulateOrderInfo_Patch Prefix");
-                    var list = new List<string>((List<string>) data); // Shallow copy
-                    string SteamTurbine = "SteamTurbine2";
-                    if (MiniBaseOptions.Instance.TurbinesDisabled && list.Contains(SteamTurbine))
-                    {
-                        list.Remove(SteamTurbine);
-                        data = list;
-                    }
-                }
-            }
-        }
-
         #region CarePackages
 
         // Immigration Speed
         [HarmonyPatch(typeof(Game), "OnSpawn")]
         public static class Game_OnSpawn_Patch
         {
-            private static void Postfix()
+            public static void Postfix()
             {
                 Log("Game_OnSpawn_Patch Postfix");
                 if (IsMiniBase())
                 {
                     var immigration = Immigration.Instance;
-                    float frequency = MiniBaseOptions.Instance.CarePackageFrequency * 600f;
+                    const float SecondsPerDay = 600f;
+                    float frequency = MiniBaseOptions.Instance.FastImmigration ? 10f : MiniBaseOptions.Instance.CarePackageFrequency * SecondsPerDay;
                     immigration.spawnInterval = new float[] { frequency, frequency };
-                    Immigration.Instance.timeBeforeSpawn = Math.Min(frequency, immigration.timeBeforeSpawn);
+                    immigration.timeBeforeSpawn = Math.Min(frequency, immigration.timeBeforeSpawn);
                 }
             }
         }
-
+        
         // Add care package drops
         [HarmonyPatch(typeof(Immigration), "ConfigureCarePackages")]
         public static class Immigration_ConfigureCarePackages_Patch
         {
-            private static void Postfix(Immigration __instance, ref CarePackageInfo[]  ___carePackages)
+            public static void Postfix(ref CarePackageInfo[]  ___carePackages)
             {
                 Log("Immigration_ConfigureCarePackages_Patch Postfix");
                 if (!IsMiniBase())
@@ -170,7 +145,6 @@ namespace MiniBase
                 AddItem("BasicSingleHarvestPlantSeed", 4f);             // Mealwood
                 AddItem("SeaLettuceSeed", 3f);                          // Waterweed
                 AddItem("SaltPlantSeed", 3f);                           // Dasha Saltvine
-                AddItem("PrickleGrassSeed", 3f);                        // Bluff Briar
                 AddItem("BulbPlantSeed", 3f);                           // Buddy Bud
                 AddItem("ColdWheatSeed", 8f);                           // Sleet Wheat      TODO: solve invisible sleetwheat / nosh bean
                 AddItem("BeanPlantSeed", 5f);                           // Nosh Bean
@@ -185,120 +159,25 @@ namespace MiniBase
             private static bool CycleCondition(int cycle) { return GameClock.Instance.GetCycle() >= cycle; }
         }
 
-        // This code was edited and used with permission from asquared31415 and is subject to their licenses and rights
-        // The complete unedited code and project can be found at https://github.com/asquared31415/ONI-Mods/tree/dev/src/ConfigurablePrintingPod
-        [HarmonyPatch(typeof(CharacterSelectionController), "InitializeContainers")]
-        public class CharacterSelectionControler_InitializeContainers_Patches
-        {
-            private static readonly FieldInfo TargetPackageOptions = AccessTools.Field(
-                typeof(CharacterSelectionController),
-                "numberOfCarePackageOptions"
-            );
-
-            private static readonly FieldInfo TargetDupeOptions = AccessTools.Field(
-                typeof(CharacterSelectionController),
-                "numberOfDuplicantOptions"
-            );
-
-            private static readonly MethodInfo PackageCount = AccessTools.Method(
-                typeof(CharacterSelectionControler_InitializeContainers_Patches),
-                nameof(GetRandomPackageCount)
-            );
-
-            private static readonly MethodInfo DupeCount = AccessTools.Method(
-                typeof(CharacterSelectionControler_InitializeContainers_Patches),
-                nameof(GetRandomDuplicantCount)
-            );
-
-            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> orig)
-            {
-                var codes = orig.ToList();
-
-                var label = new Label();
-                for (var i = 0; i < codes.Count; ++i)
-                {
-                    // Store label for the else branch
-                    if (codes[i].operand as string == "Enabled")
-                    {
-                        label = (Label) codes[i + 2].operand;
-                    }
-
-                    // the br.s is what goes to the end of the if...else
-                    // Despite the fact that the IL viewer claims it's a br.s, it's a br???
-                    if (codes[i].opcode == OpCodes.Br)
-                    {
-                        // ... so we start at the next instruction
-                        i++;
-                        // Search for and remove both stores
-                        var first = codes.FindIndex(i, ci => ci.opcode == OpCodes.Stfld);
-                        var finalIndex = codes.FindIndex(first + 1, ci => ci.opcode == OpCodes.Stfld);
-                        if (finalIndex != -1)
-                        {
-                            codes.RemoveRange(i, finalIndex - i + 1);
-
-                            // Then start adding our code
-                            // We call helpers to GREATLY simplify the IL
-                            // First get packages, then dupes
-                            codes.Insert(i++, new CodeInstruction(OpCodes.Ldarg_0) { labels = new List<Label> { label } });
-                            codes.Insert(i++, new CodeInstruction(OpCodes.Call, PackageCount));
-                            codes.Insert(i++, new CodeInstruction(OpCodes.Stfld, TargetPackageOptions));
-
-                            codes.Insert(i++, new CodeInstruction(OpCodes.Ldarg_0));
-                            codes.Insert(i++, new CodeInstruction(OpCodes.Ldarg_0));
-                            codes.Insert(i++, new CodeInstruction(OpCodes.Call, DupeCount));
-                            codes.Insert(i, new CodeInstruction(OpCodes.Stfld, TargetDupeOptions));
-                        }
-                        else
-                        {
-                            Debug.LogError("[ConfigurablePrintingPod] Could not patch InitializeContainers: Index");
-                        }
-
-                        return codes;
-                    }
-                }
-
-                Debug.LogError("[ConfigurablePrintingPod] Something went really wrong!");
-                return codes;
-            }
-
-            private static int GetRandomPackageCount()
-            {
-                if(IsMiniBase())
-                    return 3;
-                return UnityEngine.Random.Range(0, 101) > 70 ? 2 : 1;
-            }
-
-            private static int GetRandomDuplicantCount(CharacterSelectionController instance)
-            {
-                if (IsMiniBase())
-                    return 1;
-                return 4 - ((int) TargetPackageOptions.GetValue(instance));
-            }
-        }
-
         #endregion
 
         #region WorldGen
 
-        // Add minibase asteroid type
+        // Add minibase asteroid cluster
         [HarmonyPatch(typeof(Db), "Initialize")]
         public class Db_Initialize_Patch
         {
-            public static string Name = "MiniBase";
-            private static string Description = "An encapsulated location with just enough to get by.\n\n<smallcaps>Customize this location by clicking MiniBase Options in the Mods menu.</smallcaps>\n\n";
-            private static string IconName = "Asteroid_minibase";
-
             public static void Prefix()
             {
                 Log("Db_Initialize_Patch Prefix");
-                Strings.Add($"STRINGS.WORLDS." + Name.ToUpperInvariant() + ".NAME", Name);
-                Strings.Add($"STRINGS.WORLDS." + Name.ToUpperInvariant() + ".DESCRIPTION", Description);
-
-                string spritePath = System.IO.Path.Combine(ModPath, IconName) + ".png";
+                Strings.Add($"STRINGS.WORLDS.{ClusterName.ToUpperInvariant()}.NAME", ClusterName);
+                Strings.Add($"STRINGS.WORLDS.{ClusterName.ToUpperInvariant()}.DESCRIPTION", ClusterDescription);
+                
+                string spritePath = System.IO.Path.Combine(ModPath, ClusterIconName) + ".png";
                 Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
                 ImageConversion.LoadImage(texture, File.ReadAllBytes(spritePath));
                 Sprite sprite = Sprite.Create(texture, new Rect(0f, 0f, 512f, 512f), Vector2.zero);
-                Assets.Sprites.Add(IconName, sprite);
+                Assets.Sprites.Add(ClusterIconName, sprite);
             }
         }
 
@@ -306,10 +185,10 @@ namespace MiniBase
         [HarmonyPatch(typeof(Worlds), "UpdateWorldCache")]
         public static class Worlds_UpdateWorldCache_Patch
         {
-            private static void Postfix(Worlds __instance)
+            public static void Postfix(Worlds __instance)
             {
                 Log("Worlds_UpdateWorldCache_Patch Postfix");
-                var world = __instance.worldCache["worlds/" + Db_Initialize_Patch.Name];
+                var world = __instance.worldCache["worlds/" + ClusterName];
                 Traverse.Create(world).Property("worldsize").SetValue(new Vector2I(WORLD_WIDTH, WORLD_HEIGHT));
             }
         }
@@ -318,31 +197,32 @@ namespace MiniBase
         [HarmonyPatch(typeof(WorldGen), "RenderOffline")]
         public static class WorldGen_RenderOffline_Patch
         {
-            private static bool Prefix()
+            public static bool Prefix()
             {
                 Log("WorldGen_RenderOffline_Patch Prefix");
-                // Skip the original method
+                // Skip the original method if on minibase world
                 return !IsMiniBase();
             }
 
-            private static void Postfix(WorldGen __instance, Sim.Cell[] __result, ref Sim.DiseaseCell[] dc)
+            public static void Postfix(WorldGen __instance, ref bool __result, ref Sim.Cell[] cells, ref Sim.DiseaseCell[] dc, int baseId)
             {
                 if (!IsMiniBase())
                     return;
                 Log("WorldGen_RenderOffline_Patch Postfix");
-                __result = MiniBaseWorldGen.CreateWorld(__instance, ref dc);
+                __result = MiniBaseWorldGen.CreateWorld(__instance, ref cells, ref dc, baseId);
             }
         }
 
         #endregion
 
         #region Debug
-        /*
+
         // test
+        /*
         [HarmonyPatch(typeof(WorldGen), "GenerateLayout")]
         public static class WorldGen_GenerateLayout_Patch
         {
-            private static bool Prefix()
+            public static bool Prefix()
             {
                 Log("WorldGen_GenerateLayout_Patch Prefix");
                 return false;
